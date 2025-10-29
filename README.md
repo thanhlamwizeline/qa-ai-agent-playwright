@@ -21,10 +21,6 @@
   ```shell
   npm install
   ```
-* Run 
-  ```shell
-  npm install @cucumber/cucumber
-    ```
   
 ## Test commands
 
@@ -38,14 +34,6 @@ The project includes a set of tests to ensure the stability and correct function
 - Run Test on all browsers (Chrome, Firefox, Edge):
     ```shell
     npm run tests:e2e-allbrowsers
-    ```
-
-- Run Test with Cucumber:
-    ```shell
-    npm run tests:cucumber-chrome
-    npm run tests:cucumber-chrome-headless
-    npm run tests:cucumber-smoke
-    npm run tests:cucumber-smoke-parallel
     ```
 ## Template features
 This project encompasses various scenarios and practices, including:
@@ -68,20 +56,6 @@ This project encompasses various scenarios and practices, including:
 * Integration of GitHub Actions
 * HTML reporting for Playwright
 
-**Playwright Cucumber**
-* Adoption of the Page Object Model
-* Implementation of Test Definitions
-* Utilization of Cucumber for test scenarios and scenario outlines for data parameterization
-* Implementation of World for test context
-* Integration of Hooks for additional functionality
-* Retry mechanism
-* Execution of tests with annotations like "Smoke" or "Regression"
-* Capability for multi-browser execution
-* Parallel execution of tests
-* Execution in both Headless and Headed modes
-* Integration of GitHub Actions
-* Generation of Cucumber reports
-
 ## Tech Stack
 * Playwright
 * TypeScript
@@ -89,35 +63,38 @@ This project encompasses various scenarios and practices, including:
 
 ## Project Structure
  ```shell
-├── .github/workflows                           # Directory containing GitHub Actions files
-├── data                                        # Test data
-│   ├── config                                  
-│   └── testdata
-├── features                                    # Cucumber features
-│   ├── helpers
-│   ├── step_definitions                        # Cucumber step definitions
-│   ├── Login Validation Test Suite.feature     # Feature file storing Cucumber scenarios
-├── pages                                       # Page objects
-│   ├── CartPage.ts
-│   ├── HomePage.ts
-│   ├── LoginPage.ts
-│   ├── POManager.ts
-│   ├── ProductDetailPage.ts
-│   ├── components
-│   │   └── Navigation.ts
-│   └── utils
-│       ├── CommonActions.ts
-│       └── TestHelpers.ts
-├── tests                                       # FE Test cases
-│   ├── auth.setup.ts
-│   └── e2e
-│       ├── __screenshots__
-│       ├── e2e_basic.spec.ts
-│       └── e2e_image.spec.ts
-├── .env
-├── cucumber.json                               # Cucumber configuration 
-├── package.json
-└── playwright.config.ts                        
+.github/workflows/
+ └── e2e_default_test.yml         # CI/CD workflow for E2E tests
+
+data/
+ ├── config/
+ │    └── testconfig.ts           # Environment/test configuration
+ ├── testdata/
+ │    ├── products/
+ │    │    └── data_e2e.json      # E2E product data
+ │    └── constants.ts            # Global constants & URLs
+
+pages/
+ ├── components/
+ │    └── Navigation.ts           # Shared UI component
+ ├── utils/
+ │    ├── CartPage.ts
+ │    ├── HomePage.ts
+ │    ├── LoginPage.ts
+ │    ├── ProductDetailPage.ts
+ │    └── POManager.ts            # Centralized Page Object manager
+
+tests/
+ └── e2e/
+      ├── __screenshots__/        # Visual regression baselines
+      ├── e2e_basic.spec.ts
+      ├── e2e_image.spec.ts
+      ├── e2e_product.spec.ts
+      └── auth.setup.ts
+
+.gitignore
+README.md
+CONVENTIONS.md  
 ```
 ## GitHub Actions
 Make sure to create Actions Secrets for each environment variable stated above. This is used to create a .env file for the GitHub Actions executions.
@@ -137,19 +114,4 @@ Below are the sample scripts that we can run with npm run {scriptname} like `npm
 "tests:e2e-firefox": "npx playwright test --project=TestOnFireFox",
 "tests:e2e-edge": "npx playwright test --project=TestOnEdge",
 "tests:e2e-allbrowsers": "npx playwright test --project=MultiBrowser",
-"tests:cucumber": "npx cucumber-js --require features/helpers/hooks.ts --exit",
-"tests:cucumber-chrome": "BROWSER=chrome npx cucumber-js --require features/helpers/hooks.ts --exit",
-"tests:cucumber-chrome-headless": "BROWSER=chrome HEADLESS=true npx cucumber-js --require features/helpers/hooks.ts --exit",
-"tests:cucumber-firefox": "BROWSER=firefox npx cucumber-js --require features/helpers/hooks.ts --exit",
-"tests:cucumber-firefox-headless": "BROWSER=firefox HEADLESS=true  npx cucumber-js --require features/helpers/hooks.ts --exit",
-"tests:cucumber-safari": "BROWSER=webkit npx cucumber-js --require features/helpers/hooks.ts --exit",
-"tests:cucumber-safari-headless": "BROWSER=webkit HEADLESS=true npx cucumber-js --require features/helpers/hooks.ts --exit",
-"tests:cucumber-login": "npx cucumber-js --require features/helpers/hooks.ts --tags='@login' --exit",
-"tests:cucumber-smoke": "npx cucumber-js --require features/helpers/hooks.ts --tags='@smoke' --exit",
-"tests:cucumber-regression": "npx cucumber-js --require features/helpers/hooks.ts --tags='@regression' --exit",
-"tests:cucumber-smoke-parallel": "npx cucumber-js --require features/helpers/hooks.ts --tags='@smoke' --parallel 3 --exit",
-"tests:cucumber-smoke-parallel-retry": "npx cucumber-js --require features/helpers/hooks.ts --tags='@smoke' --parallel 3 --retry 1 --exit"
 ```
-
-## Reference
-* Step definitions example: https://wizeline.github.io/qa-ai-agent-generate-automation/
