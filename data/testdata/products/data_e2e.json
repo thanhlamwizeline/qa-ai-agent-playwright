@@ -1,0 +1,20 @@
+[
+    {
+        "TC": 1,
+        "ProductName": "Iphone 6 32gb",
+        "ProductPrice": "790",
+        "ImgFile": "Iphone-6-32gb.png"
+    },
+    {
+        "TC": 2,
+        "ProductName": "Samsung galaxy s7",
+        "ProductPrice": "800",
+        "ImgFile": "Samsung-galaxy-s7.png"
+    },
+    {
+        "TC": 3,
+        "ProductName": "Nokia lumia 1520",
+        "ProductPrice": "820",
+        "ImgFile": "Nokia-lumia-1520.png"
+    }
+]

@@ -1,0 +1,26 @@
+import { test } from "@playwright/test"
+import { POManager } from "../../pages/POManager"
+import { testconfig } from "../../data/config/testconfig"
+import ProductList from "../../data/testdata/products/data_e2e.json"
+import dotenv from "dotenv"
+
+dotenv.config()
+
+test.describe("@e2e end to end ", () => {
+  test.use({ storageState: 'playwright/.auth/user.json' })
+  let poManager: POManager
+  let productList: any[] = ProductList
+
+  test.beforeEach(async ({ page }) => {
+    poManager = new POManager(page)
+    await page.goto(`${process.env.BASE_URL_E2E}/${testconfig.FE_URL.URL_HOMEPAGE}`)
+  })
+
+  for (let product of productList) {
+    test(`@image @regression Product ${product.ProductName} Image displays correctly at Product List`, async ({browserName}) => {
+      const homePage = poManager.getHomepage()
+      await homePage.expectCorrectProductImage(product.ProductName, product.ImgFile, browserName)
+    })
+  }
+
+})

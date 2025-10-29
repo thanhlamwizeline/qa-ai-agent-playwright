@@ -1,0 +1,65 @@
+name: Playwright E2E Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  playwright:
+    name: 'Playwright E2E Tests'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.41.0-jammy
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Import Env data
+        run: |
+          echo "BASE_URL_E2E=${{ secrets.BASE_URL_E2E }}" > .env
+          echo "username=${{ secrets.USERNAME }}" >> .env
+          echo "password=${{ secrets.PASSWORD }}" >> .env
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        run: npm run tests:e2e
+
+      - name: Debug reports
+        if: always()
+        run: ls -R
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: playwright-report/**
+          retention-days: 10
+
+      - name: Comment test results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const status = '${{ job.status }}' === 'success' ? '✅ Passed' : '❌ Failed';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `${status} – E2E tests finished. [View run details here](${runUrl}).`
+            });

@@ -1,0 +1,36 @@
+name: Playwright Cucumber Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  playwright:
+    name: 'Playwright Cucumber Tests'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.41.0-jammy
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Import Env data
+        run: |
+          echo "BASE_URL_E2E=${{ secrets.BASE_URL_E2E }}" > .env
+          echo "username=${{ secrets.USERNAME }}" >> .env
+          echo "password=${{ secrets.PASSWORD }}" >> .env
+      - name: Install dependencies
+        run: npm install
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Install Playwright Cucumber
+        run: npm install playwright-cucumber --save-dev
+      - name: Run your tests
+        run: npm run tests:cucumber-chrome-headless
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cucumber-report
+          path: test-results/cucumber-report.html
+          retention-days: 10
