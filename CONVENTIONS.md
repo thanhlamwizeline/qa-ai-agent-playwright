@@ -1,20 +1,24 @@
 # CONVENTIONS.md
 
-Conventions for Playwright tests with TypeScript using Anthropic’s Claude Sonnet 4. Focus on consistency, maintainability, scalability by implementing POM design pattern.
+Conventions for Playwright tests with TypeScript. Focus on consistency, maintainability, scalability by implementing POM design pattern.
 
 ### 1. Modularity & Reuse ###
-- Implement POMs in pages/.
-- Extract components to components/, non-test utilities to utils/.
-- Use TypeScript path mapping for clean imports (@/pages/*, @/utils/*, etc.).
+- POMs reside in pages/ and represent logical application areas.
+- Shared components go into pages/components/.
+- Cross-page utilities (navigation helpers, managers) belong in pages/utils/.
+- Test data and environment configurations live under data/.
+- Test specs are placed under tests/e2e/ with descriptive filenames.
 
 ### 2. POM Guidelines ###
-- Page-level locators as props.
-- Methods for user actions only.
-- Keep assertions in test files.
+- Declare locators as class properties for visibility and reuse.
+- Define methods for user interactions (not assertions).
+- Avoid direct Playwright calls in tests; delegate to POMs.
+- Keep assertions only in .spec.ts files.
+- Centralize all page object creation in POManager.ts.
 
 ### 3. Structure & Naming ###
 - Hierarchical tests/e2e/<test>.spec.ts structure.
-- Descriptive file and test names that reflect the specific functionality being tested (e.g., product-navigation.spec.ts).
+- Descriptive file and test names that reflect the specific functionality being tested.(Ex: e2e_product.spec.ts)
 - describe for suites; test/it for cases.
 - Avoid duplicate test names.
 - Break down monolithic test files into smaller, focused spec files.
