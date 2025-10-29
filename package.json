@@ -8,29 +8,16 @@
     "tests:e2e-basic": "npx playwright test --grep @smoke --project=TestOnChrome",
     "tests:e2e-firefox": "npx playwright test --project=TestOnFireFox",
     "tests:e2e-edge": "npx playwright test --project=TestOnEdge",
-    "tests:e2e-allbrowsers": "npx playwright test --project=MultiBrowser",
-    "tests:cucumber": "npx cucumber-js --require features/helpers/hooks.ts --exit",
-    "tests:cucumber-chrome": "BROWSER=chrome npx cucumber-js --require features/helpers/hooks.ts --exit",
-    "tests:cucumber-chrome-headless": "BROWSER=chrome HEADLESS=true npx cucumber-js --require features/helpers/hooks.ts --exit",
-    "tests:cucumber-firefox": "BROWSER=firefox npx cucumber-js --require features/helpers/hooks.ts --exit",
-    "tests:cucumber-firefox-headless": "BROWSER=firefox HEADLESS=true  npx cucumber-js --require features/helpers/hooks.ts --exit",
-    "tests:cucumber-safari": "BROWSER=webkit npx cucumber-js --require features/helpers/hooks.ts --exit",
-    "tests:cucumber-safari-headless": "BROWSER=webkit HEADLESS=true npx cucumber-js --require features/helpers/hooks.ts --exit",
-    "tests:cucumber-login": "npx cucumber-js --require features/helpers/hooks.ts --tags='@login' --exit",
-    "tests:cucumber-smoke": "npx cucumber-js --require features/helpers/hooks.ts --tags='@smoke' --exit",
-    "tests:cucumber-regression": "npx cucumber-js --require features/helpers/hooks.ts --tags='@regression' --exit",
-    "tests:cucumber-smoke-parallel": "npx cucumber-js --require features/helpers/hooks.ts --tags='@smoke' --parallel 3 --exit",
-    "tests:cucumber-smoke-parallel-retry": "npx cucumber-js --require features/helpers/hooks.ts --tags='@smoke' --parallel 3 --retry 1 --exit"
+    "tests:e2e-allbrowsers": "npx playwright test --project=MultiBrowser"
   },
   "keywords": [],
   "author": "Wizeline",
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.55.0",
+    "@playwright/test": "^1.56.1",
     "@types/node": "20.7.0"
   },
   "dependencies": {
-    "@cucumber/cucumber": "^10.2.1",
     "dotenv": "16.3.1",
     "exceljs": "^4.4.0",
     "ts-node": "^10.9.2"
