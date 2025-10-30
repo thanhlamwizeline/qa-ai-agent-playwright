@@ -77,173 +77,282 @@ Follow these to ensure consistent, maintainable, production-grade Playwright tes
 
 ## 12. Project Configuration For AI Analysis
 
-This configuration section allows the AI Agent to understand the specific structure and conventions of this automation repository. It overrides the default framework configuration.
+This configuration allows the AI Agent to understand the specific structure and conventions of this automation repository. These settings **override** the default framework configuration in `frameworks/playwright_native_pom_typescript.json`.
 
-**Framework:** `playwright-native`
+**Important:** Only include fields you want to customize. All other fields will use defaults from the framework configuration.
 
-```yaml
-# Repository Structure Configuration
-# Defines where the AI Agent should look for different types of files
-repository_structure:
-  pages:
-    directory: "page-objects"
-    description: "Page object files directory"
-    file_patterns:
-      - "*.ts"
-      - "**/*.ts"
-    subdirectories:
-      utils: "helpers"
-      components: "page-objects/components"
+```json
+{
+  "framework_id": "playwright_native_pom_typescript",
+  "name": "Playwright Native with POM (TypeScript)",
+  "language": "typescript",
+  "test_framework": "playwright",
+  "bdd_framework": "none",
+  "design_pattern": "page_object_model",
+  "description": "Native Playwright test framework with Page Object Model using test() and describe() blocks in TypeScript",
 
-  tests:
-    directory: "tests"
-    description: "Test spec files directory"
-    file_patterns:
-      - "*.spec.ts"
-      - "**/*.spec.ts"
+  "detection": {
+    "description": "Rules for automatically detecting this framework in a repository",
+    "required_files": ["package.json", "playwright.config.ts"],
+    "required_dependencies": ["@playwright/test"],
+    "structure_patterns": [
+      "tests/**/*.spec.ts",
+      "page-objects/**/*.ts"
+    ]
+  },
 
-  test_data:
-    directory: "data"
-    description: "Test data files directory"
-    file_patterns:
-      - "*.ts"
-      - "*.json"
-    subdirectories:
-      config: "data/config"
-      testdata: "data/testdata"
+  "repository_structure": {
+    "pages": {
+      "directory": "page-objects",
+      "description": "Page object files directory",
+      "file_patterns": ["*.ts", "**/*.ts"]
+    },
+    "tests": {
+      "directory": "tests",
+      "description": "Test spec files directory",
+      "file_patterns": ["*.spec.ts", "**/*.spec.ts"]
+    },
+    "test_data": {
+      "directory": "data",
+      "description": "Test data files directory",
+      "file_patterns": ["*.ts", "*.json"]
+    },
+    "helpers": {
+      "directory": "helpers",
+      "description": "Test helper utilities",
+      "file_patterns": ["*.ts"]
+    }
+  },
 
-  helpers:
-    directory: "helpers"
-    description: "Test helper utilities"
-    file_patterns:
-      - "*.ts"
+  "architectural_files": {
+    "description": "Critical architectural files that AI should analyze. System searches 'possible_paths' in priority order until found.",
+    "files": [
+      {
+        "name": "POManager",
+        "possible_paths": [
+          "page-objects/POManager.ts"
+        ],
+        "description": "Page Object Manager pattern implementation",
+        "required": true
+      },
+      {
+        "name": "Navigation",
+        "possible_paths": [
+          "page-objects/components/Navigation.ts"
+        ],
+        "description": "Navigation component for routing",
+        "required": false
+      },
+      {
+        "name": "CommonActions",
+        "possible_paths": [
+          "helpers/CommonActions.ts"
+        ],
+        "description": "Reusable common actions",
+        "required": false
+      },
+      {
+        "name": "TestHelpers",
+        "possible_paths": [
+          "helpers/TestHelpers.ts"
+        ],
+        "description": "Test utility helpers",
+        "required": false
+      }
+    ]
+  },
 
-# Architectural Files
-# Critical files that the AI Agent should analyze for context
-# System searches 'possible_paths' in priority order until found
-architectural_files:
-  - name: "POManager"
-    possible_paths:
-      - "page-objects/POManager.ts"
-      - "POManager.ts"
-      - "src/page-objects/POManager.ts"
-    description: "Page Object Manager pattern implementation"
-    required: true
+  "file_extensions": {
+    "description": "Supported file extensions for this framework",
+    "typescript": [".ts"],
+    "test_files": [".spec.ts", ".test.ts"],
+    "data": [".json", ".ts"]
+  },
 
-  - name: "Navigation"
-    possible_paths:
-      - "page-objects/components/Navigation.ts"
-      - "components/Navigation.ts"
-      - "page-objects/Navigation.ts"
-    description: "Navigation component for routing"
-    required: false
+  "file_naming_patterns": {
+    "description": "File naming conventions for AI to find and generate files",
+    "page_objects": {
+      "suffix": "Page",
+      "pattern": "*Page.ts",
+      "examples": ["LoginPage.ts", "HomePage.ts", "CartPage.ts", "ProductDetailPage.ts"]
+    },
+    "test_files": {
+      "suffix": ".spec.ts",
+      "pattern": "*.spec.ts",
+      "examples": ["product_validation.spec.ts", "cart_validation.spec.ts"]
+    },
+    "components": {
+      "suffix": "",
+      "pattern": "*.ts",
+      "examples": ["Navigation.ts", "Header.ts", "Footer.ts"]
+    },
+    "helpers": {
+      "suffix": "Actions",
+      "pattern": "*Actions.ts",
+      "examples": ["CommonActions.ts", "TestHelpers.ts"]
+    }
+  },
 
-  - name: "CommonActions"
-    possible_paths:
-      - "helpers/CommonActions.ts"
-      - "utils/CommonActions.ts"
-    description: "Reusable common actions"
-    required: false
+  "syntax_patterns": {
+    "description": "Language and framework-specific syntax patterns for AI code generation and analysis",
+    "class_declaration": "export class {ClassName}",
+    "constructor": "constructor(page: Page)",
+    "private_property": "private readonly {propertyName}: {Type}",
+    "method_declaration": "async {methodName}({params}): Promise<{ReturnType}>",
+    "import_statement": "import { {symbols} } from '{path}'",
+    "import_playwright": "import { test, expect, Page, Locator } from '@playwright/test'",
+    "import_page_object": "import { {PageClass} } from '{relativePath}'",
+    "test_describe": "test.describe('{description}', () => { })",
+    "test_case": "test('{description}', async ({ page }) => { })",
+    "test_beforeEach": "test.beforeEach(async ({ page }) => { })",
+    "test_use": "test.use({ storageState: 'path/to/state.json' })",
+    "locator_patterns": [
+      "page.locator('{selector}')",
+      "page.getByRole('{role}', { name: '{name}' })",
+      "page.getByText('{text}')",
+      "page.getByTestId('{testId}')",
+      "this.page.locator('{selector}')",
+      ".filter({ hasText: '{text}' })",
+      ".filter({ has: this.page.locator('{selector}') })"
+    ],
+    "assertion_patterns": [
+      "await expect({locator}).toBeVisible()",
+      "await expect({locator}).toHaveText('{text}')",
+      "await expect({locator}).toContainText('{text}')",
+      "await expect.poll(() => {expression}, { timeout: {ms} }).toContain('{text}')"
+    ],
+    "action_patterns": [
+      "await {locator}.click()",
+      "await {locator}.fill('{value}')",
+      "await this.page.goto('{url}')",
+      "await this.page.waitForLoadState('networkidle')"
+    ]
+  },
 
-  - name: "TestHelpers"
-    possible_paths:
-      - "helpers/TestHelpers.ts"
-      - "utils/TestHelpers.ts"
-    description: "Test utility helpers"
-    required: false
+  "code_style_conventions": {
+    "description": "Code style conventions for AI code generation",
+    "indentation": 2,
+    "line_length": 120,
+    "quote_style": "single",
+    "semicolons": true,
+    "naming": {
+      "classes": "PascalCase",
+      "functions": "camelCase",
+      "variables": "camelCase",
+      "constants": "UPPER_SNAKE_CASE",
+      "private_properties": "camelCase"
+    },
+    "access_modifiers": {
+      "page_properties": "private readonly",
+      "locators": "private readonly",
+      "methods": "async (public by default)"
+    },
+    "test_structure": {
+      "use_describe_blocks": true,
+      "use_test_use_for_setup": true,
+      "use_fixtures": true,
+      "tags_format": "@tag-name in describe string"
+    }
+  },
 
-# File Extensions
-file_extensions:
-  typescript:
-    - ".ts"
-  javascript:
-    - ".js"
-  test_files:
-    - ".spec.ts"
-    - ".test.ts"
-  data:
-    - ".json"
-    - ".ts"
+  "search_priorities": {
+    "description": "File discovery order for AI analysis. Higher in list = higher priority.",
+    "page_objects": [
+      "page-objects/*.ts",
+      "page-objects/**/*.ts"
+    ],
+    "test_files": [
+      "tests/**/*.spec.ts",
+      "tests/*.spec.ts"
+    ],
+    "helpers": [
+      "helpers/*.ts"
+    ],
+    "architectural": [
+      "page-objects/POManager.ts",
+      "page-objects/components/Navigation.ts",
+      "helpers/CommonActions.ts",
+      "helpers/TestHelpers.ts"
+    ]
+  },
 
-# Naming Conventions
-naming_conventions:
-  page_objects:
-    suffix: "Page"
-    pattern: "*Page.ts"
-    examples:
-      - "LoginPage.ts"
-      - "HomePage.ts"
-      - "CheckoutPage.ts"
+  "code_generation": {
+    "description": "Settings for AI code generation",
+    "generated_file_patterns": {
+      "test_files": "tests/**/*.spec.ts",
+      "page_objects": "page-objects/**/*Page.ts",
+      "helpers": "helpers/**/*.ts"
+    },
+    "naming": {
+      "test_suffix": ".spec.ts",
+      "page_suffix": "Page.ts",
+      "component_suffix": ".ts"
+    },
+    "structure": {
+      "test_organization": "describe/test",
+      "imports_style": "typescript",
+      "use_async_await": true
+    },
+    "test_file_naming": {
+      "pattern": "{feature-name}_{validation-type}.spec.ts",
+      "case": "snake_case"
+    },
+    "imports": {
+      "test_framework": "import { test, expect } from '@playwright/test';",
+      "use_path_mapping": false
+    },
+    "test_structure": {
+      "use_describe_blocks": true,
+      "use_test_fixtures": true,
+      "use_test_use_for_setup": true,
+      "use_beforeEach": true,
+      "async_await": true,
+      "tags_in_describe": true
+    }
+  },
 
-  test_files:
-    suffix: ".spec.ts"
-    pattern: "*.spec.ts"
-    examples:
-      - "login.spec.ts"
-      - "checkout.spec.ts"
+  "test_runner": {
+    "description": "Test execution configuration for running tests",
+    "command_template": "npx playwright test {filter} {options}",
+    "filter_strategies": {
+      "by_file": "{test_file_path}",
+      "by_tag": "--grep @{tag}",
+      "by_name": "--grep {test_name}",
+      "by_project": "--project={project_name}"
+    },
+    "output_format": "json",
+    "json_reporter": "--reporter=json",
+    "default_timeout": 60000,
+    "default_retries": 2,
+    "additional_options": [
+      "--workers=4",
+      "--reporter=html",
+      "--trace=on-first-retry"
+    ]
+  }
+}
+```
 
-  components:
-    suffix: ""
-    pattern: "*.ts"
-    examples:
-      - "Navigation.ts"
-      - "Header.ts"
+**Customization Guide:**
 
-# Search Priorities
-# File discovery order - higher in list = higher priority
-search_priorities:
-  page_objects:
-    - "page-objects/*.ts"
-    - "page-objects/**/*.ts"
+- **Fully customizable:** You can override ANY field from `playwright_native_pom_typescript.json`
+- **Partial override:** Only include fields you want to change (e.g., just `repository_structure`)
+- **Field order:** Matches the framework config file for consistency
+- **Key customizable fields:**
+  - `repository_structure` - Directory paths specific to your repo
+  - `architectural_files` - Critical files AI should analyze
+  - `file_naming_patterns` - Naming conventions for generated files
+  - `code_style_conventions` - Code style (indentation, quotes, etc.)
+  - `search_priorities` - File discovery order
+  - `syntax_patterns` - Language-specific syntax (if needed)
 
-  test_files:
-    - "tests/**/*.spec.ts"
-    - "tests/*.spec.ts"
-
-  helpers:
-    - "helpers/*.ts"
-    - "utils/*.ts"
-
-  architectural:
-    - "page-objects/POManager.ts"
-    - "page-objects/components/Navigation.ts"
-    - "helpers/CommonActions.ts"
-    - "helpers/TestHelpers.ts"
-
-# Code Generation Settings (Optional - Override defaults)
-code_generation:
-  test_file_naming:
-    pattern: "{feature-name}.spec.ts"
-    case: "kebab-case"
-
-  imports:
-    test_framework: "import { test, expect } from '@playwright/test';"
-    use_path_mapping: true
-    path_mappings:
-      "@/page-objects": "./page-objects"
-      "@/helpers": "./helpers"
-      "@/data": "./data"
-
-  test_structure:
-    use_describe_blocks: true
-    use_test_fixtures: true
-    async_await: true
-
-# Conventions (Optional - Override defaults from sections 1-11)
-conventions:
-  indentation: 2
-  line_length: 120
-  quote_style: "single"
-  semicolons: true
-  naming:
-    classes: "PascalCase"
-    functions: "camelCase"
-    variables: "camelCase"
-    constants: "UPPER_SNAKE_CASE"
+**Merge Priority:**
+```
+Section 12 (this file) > Framework Config > Defaults
 ```
 
 **Notes:**
-- This configuration is specific to this repository and overrides the default `playwright-native` framework configuration
-- The AI Agent will merge this with the base framework configuration at runtime
-- Update this section whenever the repository structure changes
-- All paths are relative to the repository root
+- All paths are relative to repository root
+- AI Agent reads Sections 1-11 for detailed conventions
+- AI Agent reads Section 12 for repo-specific structure
+- Update this section when repository structure changes
