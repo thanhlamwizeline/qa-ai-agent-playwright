@@ -1,7 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test'
-import {TestHelpers} from './utils/TestHelpers'
 import { Navigation } from './components/Navigation'
-import { testconfig } from '../data/config/testconfig'
+import { TestHelpers } from '../helpers/TestHelpers'
+import {testconfig} from '../data/config/testconfig.ts'
 
 export class CartPage {
   private readonly page: Page

@@ -1,5 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test'
 import { Navigation } from './components/Navigation'
+
 export class Homepage {
   private readonly page: Page
   private readonly navigationComponent: Navigation

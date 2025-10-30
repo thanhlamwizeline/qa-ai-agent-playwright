@@ -1,4 +1,4 @@
-import {POManager} from "../POManager"
+import {POManager} from "../page-objects/POManager"
 
 export class CommonActions {
     static async clearCart(poManager: POManager){

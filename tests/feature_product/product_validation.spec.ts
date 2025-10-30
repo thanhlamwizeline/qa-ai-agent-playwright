@@ -1,8 +1,8 @@
 import { test } from "@playwright/test"
-import { POManager } from "../../pages/POManager"
+import { POManager } from "../../page-objects/POManager"
 import { testconfig } from "../../data/config/testconfig"
 import ProductList from "../../data/testdata/products/data_e2e.json"
-import { CommonActions } from "../../pages/utils/CommonActions"
+import { CommonActions } from "../../helpers/CommonActions"
 import dotenv from "dotenv"
 
 dotenv.config()

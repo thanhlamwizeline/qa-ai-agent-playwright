@@ -1,6 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test'
-import { testconfig } from '../data/config/testconfig'
-import { TestHelpers } from './utils/TestHelpers'
+import { TestHelpers } from '../helpers/TestHelpers'
+import {testconfig} from '../data/config/testconfig.ts'
 
 export class ProductDetailPage {
   private readonly page: Page
