@@ -1,6 +1,6 @@
 import { test as setup, expect } from '@playwright/test'
-import { POManager } from '../pages/POManager'
-import { CommonActions } from "../pages/utils/CommonActions"
+import { POManager } from '../page-objects/POManager'
+import { CommonActions } from "../helpers/CommonActions"
 
 import dotenv from "dotenv"
 
