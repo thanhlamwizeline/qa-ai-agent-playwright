@@ -74,3 +74,176 @@ Conventions for Playwright tests with TypeScript using Anthropic’s Claude Sonn
 - Use environment-specific worker configurations.
 
 Follow these to ensure consistent, maintainable, production-grade Playwright tests.
+
+## 12. Project Configuration For AI Analysis
+
+This configuration section allows the AI Agent to understand the specific structure and conventions of this automation repository. It overrides the default framework configuration.
+
+**Framework:** `playwright-native`
+
+```yaml
+# Repository Structure Configuration
+# Defines where the AI Agent should look for different types of files
+repository_structure:
+  pages:
+    directory: "page-objects"
+    description: "Page object files directory"
+    file_patterns:
+      - "*.ts"
+      - "**/*.ts"
+    subdirectories:
+      utils: "helpers"
+      components: "page-objects/components"
+
+  tests:
+    directory: "tests"
+    description: "Test spec files directory"
+    file_patterns:
+      - "*.spec.ts"
+      - "**/*.spec.ts"
+
+  test_data:
+    directory: "data"
+    description: "Test data files directory"
+    file_patterns:
+      - "*.ts"
+      - "*.json"
+    subdirectories:
+      config: "data/config"
+      testdata: "data/testdata"
+
+  helpers:
+    directory: "helpers"
+    description: "Test helper utilities"
+    file_patterns:
+      - "*.ts"
+
+# Architectural Files
+# Critical files that the AI Agent should analyze for context
+# System searches 'possible_paths' in priority order until found
+architectural_files:
+  - name: "POManager"
+    possible_paths:
+      - "page-objects/POManager.ts"
+      - "POManager.ts"
+      - "src/page-objects/POManager.ts"
+    description: "Page Object Manager pattern implementation"
+    required: true
+
+  - name: "Navigation"
+    possible_paths:
+      - "page-objects/components/Navigation.ts"
+      - "components/Navigation.ts"
+      - "page-objects/Navigation.ts"
+    description: "Navigation component for routing"
+    required: false
+
+  - name: "CommonActions"
+    possible_paths:
+      - "helpers/CommonActions.ts"
+      - "utils/CommonActions.ts"
+    description: "Reusable common actions"
+    required: false
+
+  - name: "TestHelpers"
+    possible_paths:
+      - "helpers/TestHelpers.ts"
+      - "utils/TestHelpers.ts"
+    description: "Test utility helpers"
+    required: false
+
+# File Extensions
+file_extensions:
+  typescript:
+    - ".ts"
+  javascript:
+    - ".js"
+  test_files:
+    - ".spec.ts"
+    - ".test.ts"
+  data:
+    - ".json"
+    - ".ts"
+
+# Naming Conventions
+naming_conventions:
+  page_objects:
+    suffix: "Page"
+    pattern: "*Page.ts"
+    examples:
+      - "LoginPage.ts"
+      - "HomePage.ts"
+      - "CheckoutPage.ts"
+
+  test_files:
+    suffix: ".spec.ts"
+    pattern: "*.spec.ts"
+    examples:
+      - "login.spec.ts"
+      - "checkout.spec.ts"
+
+  components:
+    suffix: ""
+    pattern: "*.ts"
+    examples:
+      - "Navigation.ts"
+      - "Header.ts"
+
+# Search Priorities
+# File discovery order - higher in list = higher priority
+search_priorities:
+  page_objects:
+    - "page-objects/*.ts"
+    - "page-objects/**/*.ts"
+
+  test_files:
+    - "tests/**/*.spec.ts"
+    - "tests/*.spec.ts"
+
+  helpers:
+    - "helpers/*.ts"
+    - "utils/*.ts"
+
+  architectural:
+    - "page-objects/POManager.ts"
+    - "page-objects/components/Navigation.ts"
+    - "helpers/CommonActions.ts"
+    - "helpers/TestHelpers.ts"
+
+# Code Generation Settings (Optional - Override defaults)
+code_generation:
+  test_file_naming:
+    pattern: "{feature-name}.spec.ts"
+    case: "kebab-case"
+
+  imports:
+    test_framework: "import { test, expect } from '@playwright/test';"
+    use_path_mapping: true
+    path_mappings:
+      "@/page-objects": "./page-objects"
+      "@/helpers": "./helpers"
+      "@/data": "./data"
+
+  test_structure:
+    use_describe_blocks: true
+    use_test_fixtures: true
+    async_await: true
+
+# Conventions (Optional - Override defaults from sections 1-11)
+conventions:
+  indentation: 2
+  line_length: 120
+  quote_style: "single"
+  semicolons: true
+  naming:
+    classes: "PascalCase"
+    functions: "camelCase"
+    variables: "camelCase"
+    constants: "UPPER_SNAKE_CASE"
+```
+
+**Notes:**
+- This configuration is specific to this repository and overrides the default `playwright-native` framework configuration
+- The AI Agent will merge this with the base framework configuration at runtime
+- Update this section whenever the repository structure changes
+- All paths are relative to the repository root
