@@ -83,8 +83,6 @@ This configuration allows the AI Agent to understand the specific structure and 
 
 ```json
 {
-  "framework_id": "playwright_native_pom_typescript",
-  "name": "Playwright Native with POM (TypeScript)",
   "language": "typescript",
   "test_framework": "playwright",
   "bdd_framework": "none",
@@ -233,8 +231,6 @@ This configuration allows the AI Agent to understand the specific structure and 
     "description": "Code style conventions for AI code generation",
     "indentation": 2,
     "line_length": 120,
-    "quote_style": "single",
-    "semicolons": true,
     "naming": {
       "classes": "PascalCase",
       "functions": "camelCase",
@@ -249,9 +245,11 @@ This configuration allows the AI Agent to understand the specific structure and 
     },
     "test_structure": {
       "use_describe_blocks": true,
+      "use_test_fixtures": true,
       "use_test_use_for_setup": true,
-      "use_fixtures": true,
-      "tags_format": "@tag-name in describe string"
+      "use_beforeEach": true,
+      "async_await": true,
+      "tags_in_describe": true
     }
   },
 
@@ -294,7 +292,7 @@ This configuration allows the AI Agent to understand the specific structure and 
       "use_async_await": true
     },
     "test_file_naming": {
-      "pattern": "{feature-name}_{validation-type}.spec.ts",
+      "pattern": "{feature-name}_{validation}.spec.ts",
       "case": "snake_case"
     },
     "imports": {
@@ -303,11 +301,8 @@ This configuration allows the AI Agent to understand the specific structure and 
     },
     "test_structure": {
       "use_describe_blocks": true,
-      "use_test_fixtures": true,
-      "use_test_use_for_setup": true,
       "use_beforeEach": true,
       "async_await": true,
-      "tags_in_describe": true
     }
   },
 
