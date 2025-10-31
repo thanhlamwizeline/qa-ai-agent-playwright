@@ -83,23 +83,8 @@ This configuration allows the AI Agent to understand the specific structure and 
 
 ```json
 {
-  "language": "typescript",
-  "test_framework": "playwright",
-  "bdd_framework": "none",
-  "design_pattern": "page_object_model",
-  "description": "Native Playwright test framework with Page Object Model using test() and describe() blocks in TypeScript",
-
-  "detection": {
-    "description": "Rules for automatically detecting this framework in a repository",
-    "required_files": ["package.json", "playwright.config.ts"],
-    "required_dependencies": ["@playwright/test"],
-    "structure_patterns": [
-      "tests/**/*.spec.ts",
-      "page-objects/**/*.ts"
-    ]
-  },
-
   "repository_structure": {
+    "description": "Default directory structure. Can be overridden in CONVENTIONS.md Section 12",
     "pages": {
       "directory": "page-objects",
       "description": "Page object files directory",
@@ -134,17 +119,17 @@ This configuration allows the AI Agent to understand the specific structure and 
         "required": true
       },
       {
-        "name": "Navigation",
+        "name": "NavigationComponent",
         "possible_paths": [
-          "page-objects/components/Navigation.ts"
+          "page-objects/components/NavigationComponent.ts"
         ],
         "description": "Navigation component for routing",
         "required": false
       },
       {
-        "name": "CommonActions",
+        "name": "CommonActionsHelpers",
         "possible_paths": [
-          "helpers/CommonActions.ts"
+          "helpers/CommonActionsHelpers.ts"
         ],
         "description": "Reusable common actions",
         "required": false
@@ -155,6 +140,14 @@ This configuration allows the AI Agent to understand the specific structure and 
           "helpers/TestHelpers.ts"
         ],
         "description": "Test utility helpers",
+        "required": false
+      },
+      {
+        "name": "TestSetupHelpers",
+        "possible_paths": [
+          "helpers/TestSetupHelpers.ts"
+        ],
+        "description": "Test authentication setup helpers",
         "required": false
       }
     ]
@@ -181,13 +174,13 @@ This configuration allows the AI Agent to understand the specific structure and 
     },
     "components": {
       "suffix": "",
-      "pattern": "*.ts",
-      "examples": ["Navigation.ts", "Header.ts", "Footer.ts"]
+      "pattern": "*Component.ts",
+      "examples": ["NavigationComponent.ts", "HeaderComponent.ts", "FooterComponent.ts"]
     },
     "helpers": {
       "suffix": "Actions",
       "pattern": "*Actions.ts",
-      "examples": ["CommonActions.ts", "TestHelpers.ts"]
+      "examples": ["CommonActionsHelpers.ts", "TestHelpers.ts", "TestSetupHelpers.ts"]
     }
   },
 
@@ -231,6 +224,8 @@ This configuration allows the AI Agent to understand the specific structure and 
     "description": "Code style conventions for AI code generation",
     "indentation": 2,
     "line_length": 120,
+    "quote_style": "single",
+    "semicolons": true,
     "naming": {
       "classes": "PascalCase",
       "functions": "camelCase",
@@ -245,11 +240,9 @@ This configuration allows the AI Agent to understand the specific structure and 
     },
     "test_structure": {
       "use_describe_blocks": true,
-      "use_test_fixtures": true,
       "use_test_use_for_setup": true,
-      "use_beforeEach": true,
-      "async_await": true,
-      "tags_in_describe": true
+      "use_fixtures": true,
+      "tags_format": "@tag-name in describe string"
     }
   },
 
@@ -268,9 +261,10 @@ This configuration allows the AI Agent to understand the specific structure and 
     ],
     "architectural": [
       "page-objects/POManager.ts",
-      "page-objects/components/Navigation.ts",
-      "helpers/CommonActions.ts",
-      "helpers/TestHelpers.ts"
+      "page-objects/components/NavigationComponent.ts",
+      "helpers/CommonActionsHelpers.ts",
+      "helpers/TestHelpers.ts",
+      "helpers/TestSetupHelpers.ts"
     ]
   },
 
@@ -284,7 +278,7 @@ This configuration allows the AI Agent to understand the specific structure and 
     "naming": {
       "test_suffix": ".spec.ts",
       "page_suffix": "Page.ts",
-      "component_suffix": ".ts"
+      "component_suffix": "Component.ts"
     },
     "structure": {
       "test_organization": "describe/test",
@@ -292,7 +286,7 @@ This configuration allows the AI Agent to understand the specific structure and 
       "use_async_await": true
     },
     "test_file_naming": {
-      "pattern": "{feature-name}_{validation}.spec.ts",
+      "pattern": "{feature-name}_{validation-type}.spec.ts",
       "case": "snake_case"
     },
     "imports": {
@@ -301,8 +295,11 @@ This configuration allows the AI Agent to understand the specific structure and 
     },
     "test_structure": {
       "use_describe_blocks": true,
+      "use_test_fixtures": true,
+      "use_test_use_for_setup": true,
       "use_beforeEach": true,
       "async_await": true,
+      "tags_in_describe": true
     }
   },
 
@@ -325,7 +322,6 @@ This configuration allows the AI Agent to understand the specific structure and 
       "--trace=on-first-retry"
     ]
   }
-}
 ```
 
 **Customization Guide:**
