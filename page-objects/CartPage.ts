@@ -1,5 +1,5 @@
 import { Locator, Page, expect } from '@playwright/test'
-import { Navigation } from './components/Navigation'
+import { Navigation } from './components/NavigationComponent.ts'
 import { TestHelpers } from '../helpers/TestHelpers'
 import {testconfig} from '../data/config/testconfig.ts'
 

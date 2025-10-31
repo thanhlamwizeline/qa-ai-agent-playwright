@@ -2,7 +2,7 @@ import { test } from "@playwright/test"
 import { POManager } from "../../page-objects/POManager"
 import { testconfig } from "../../data/config/testconfig"
 import ProductList from "../../data/testdata/products/data_e2e.json"
-import { CommonActions } from "../../helpers/CommonActions"
+import { CommonActions } from "../../helpers/CommonActionsHelpers"
 import dotenv from "dotenv"
 
 dotenv.config()

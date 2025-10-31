@@ -1,5 +1,5 @@
 import { Locator, Page, expect, Dialog } from '@playwright/test'
-import { Navigation } from './components/Navigation'
+import { Navigation } from './components/NavigationComponent'
 
 export class LoginPage {
   private readonly page: Page
