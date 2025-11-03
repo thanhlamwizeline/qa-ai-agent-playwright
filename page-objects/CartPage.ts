@@ -33,6 +33,10 @@ export class CartPage {
     expect(await this.lbl_TotalAmount.textContent()).toBe(amount)
   }
 
+  async verifyPlaceOrderButtonIsVisible() {
+    await expect(this.btn_PlaceOrder).toBeVisible()
+  }
+
   async clearCart() {
     await this.btn_PlaceOrder.waitFor({state:"visible"})
     await TestHelpers.waitForNumberOfSeconds(this.page, 2)

@@ -5,11 +5,17 @@ export class Homepage {
   private readonly page: Page
   private readonly navigationComponent: Navigation
   private readonly card_ProductItem: Locator
+  private readonly carousel: Locator
+  private readonly categoriesMenu: Locator
+  private readonly productList: Locator
 
   constructor(page: Page) {
     this.page = page
     this.navigationComponent = new Navigation(this.page)
     this.card_ProductItem = page.locator("//div[@class='card-block']")
+    this.carousel = page.locator('#carouselExampleIndicators')
+    this.categoriesMenu = page.locator('.list-group')
+    this.productList = page.locator('#tbodyid')
   }
 
   async verifyWelcomUsernameOnNavigationBar(username: string){
@@ -43,22 +49,17 @@ export class Homepage {
     .last().locator('img')
   }
 
-  async expectCorrectProductImage(productName: string, productImg: string, browserName: string) {
-    await this.page.waitForLoadState()
-    let productImgLocator = await this.getProductImg(productName)
-    await expect(productImgLocator).toHaveJSProperty('complete', true);
-    let imgFileWithBrowser: string;
-    
-    // Different image on Firefox browser
-    if (browserName == 'firefox') {
-      imgFileWithBrowser = 'FF-' + productImg ;
-    } else {
-      imgFileWithBrowser = productImg;
-    }
-
-      await expect(productImgLocator).toHaveScreenshot(imgFileWithBrowser,{
-      threshold: 0.5,
-      maxDiffPixelRatio: 0.01
-    });
+  async verifyCarouselIsVisible(){
+    await expect(this.carousel).toBeVisible();
   }
+
+  async verifyCatergoryMenuContainsCorrectItems(items: string[]){
+    for (const item of items) {
+      await expect(this.categoriesMenu.getByRole('link', { name: item})).toBeVisible();
+    }
+  }
+  
+  async verifyProductListIsVisible(){
+      await expect(this.productList).toBeVisible();
+  }  
 }

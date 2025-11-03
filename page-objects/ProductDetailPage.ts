@@ -6,11 +6,13 @@ export class ProductDetailPage {
   private readonly page: Page
   private readonly btn_AddToCart: Locator
   private readonly card_DetailBox: Locator
+  private readonly product_Image: Locator
 
   constructor(page: Page) {
     this.page = page
     this.btn_AddToCart = page.getByRole('link', { name: 'Add to cart' })
     this.card_DetailBox = page.locator('#tbodyid')
+    this.product_Image = page.locator('.product-image img')
   }
 
   async verifyProductDetailPageLoadsSuccessfully() {
@@ -23,6 +25,14 @@ export class ProductDetailPage {
     .filter({hasText: productName})
     .filter({hasText: productPrice})
     .waitFor({state:"visible"})
+  }
+
+  async verifyProductImageIsCorrect(imageSrc: string) {
+    await expect(this.product_Image).toHaveAttribute('src',imageSrc)
+  }
+
+  async verifyAddToCartButtonIsVisible() {
+    await expect(this.btn_AddToCart).toBeVisible()
   }
 
   async addToCart() {
