@@ -27,11 +27,22 @@ test.describe("@feature_product ", () => {
         const homePage = poManager.getHomepage()
         const productDetailPage = poManager.getProductDetailPage()
 
-        await homePage.clickOnProduct(productName, productPrice)
-        await productDetailPage.verifyProductDetailPageLoadsSuccessfully()
-        await productDetailPage.verifyProductDetail(productName, productPrice)
-        await productDetailPage.verifyProductImageIsCorrect(productImage)
-        await productDetailPage.verifyAddToCartButtonIsVisible()
+        await test.step('Navigate to product from homepage', async () => {
+          await homePage.clickOnProduct(productName, productPrice)
+        })
+
+        await test.step('Verify product detail page loads', async () => {
+          await productDetailPage.verifyProductDetailPageLoadsSuccessfully()
+        })
+
+        await test.step('Verify product information is correct', async () => {
+          await productDetailPage.verifyProductDetail(productName, productPrice)
+          await productDetailPage.verifyProductImageIsCorrect(productImage)
+        })
+
+        await test.step('Verify add to cart functionality is available', async () => {
+          await productDetailPage.verifyAddToCartButtonIsVisible()
+        })
     })
   }
 

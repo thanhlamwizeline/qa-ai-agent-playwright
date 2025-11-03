@@ -1,7 +1,8 @@
-import { test, expect } from "@playwright/test"
+import { test } from "@playwright/test"
 import { POManager } from "../../page-objects/POManager"
 import { CommonActions } from "../../helpers/CommonActionsHelpers"
 import { testconfig } from "../../data/config/testconfig"
+import { loginUser } from "../../data/login/loginUser"
 import dotenv from "dotenv"
 
 dotenv.config()
@@ -15,9 +16,9 @@ test.describe("@login Login tests", () => {
   })
 
   //Verify user login successfully
-  test("@smoke User can login successfully", async ({ page }) => {
-    const username = process.env.username as string
-    const password = process.env.password as string
+  test("@smoke User can login successfully", async () => {
+    const username = loginUser.VALID_USER.userName
+    const password = loginUser.VALID_USER.password
 
     await test.step("Login with valid credentials", async () => {
       await CommonActions.login(poManager, username, password)
@@ -28,20 +29,16 @@ test.describe("@login Login tests", () => {
       await loginPage.verifyLoginSuccessfully(username)
     })
   })
-  //Verify unsuccessful login (blank username or blank password)
-  const invalidCredentials = [
-  { username: "abc", password: process.env.password as string, expectedMessage: "Wrong password." },
-  { username: process.env.username as string, password: "abc", expectedMessage: "Wrong password." },
-]
 
+  const invalidCredentials = [ loginUser.INVALID_USER_1, loginUser.INVALID_USER_2]
 
   for (const data of invalidCredentials) {
-    test(`@negative Login should fail when username="${data.username}" or password="${data.password}"`, async ({ page }) => {
+    test(`@negative Login should fail when username="${data.userName}" or password="${data.password}"`, async () => {
       const loginPage = poManager.getLoginPage()
-      await poManager.getHomepage().clickLogin()
 
       await test.step("Attempt login with invalid credentials", async () => {
-        await loginPage.login(data.username, data.password)
+        await poManager.getHomepage().clickLogin()
+        await loginPage.login(data.userName, data.password)
       })
 
       await test.step("Verify login failed dialog message", async () => {

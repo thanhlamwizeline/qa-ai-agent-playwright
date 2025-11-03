@@ -14,9 +14,11 @@ export default defineConfig({
   workers: process.env.CI ? 4 : 2,
   reporter: process.env.CI ? [
     ['html'],
-    ['junit', { outputFile: `test-results/test-results-${new Date().toISOString().replace(/[:.]/g, '-')}.xml` }]
+    ['junit', { outputFile: `test-results/test-results-${new Date().toISOString().replace(/[:.]/g, '-')}.xml` }],
+    ['dot']
   ] : [
     ['html'],
+    ['junit', { outputFile: `test-results/test-results-${new Date().toISOString().replace(/[:.]/g, '-')}.xml` }],
     ['dot']
   ],
   use: {
