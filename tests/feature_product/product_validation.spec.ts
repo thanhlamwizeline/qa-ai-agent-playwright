@@ -1,16 +1,16 @@
 import { test } from "@playwright/test"
 import { POManager } from "../../page-objects/POManager"
 import { testconfig } from "../../data/config/testconfig"
-import ProductList from "../../data/testdata/products/data_e2e.json"
+import { products} from "../../data/products/products"
 import { CommonActions } from "../../helpers/CommonActionsHelpers"
 import dotenv from "dotenv"
 
 dotenv.config()
 
-test.describe("@e2e end to end ", () => {
+test.describe("@feature_product ", () => {
   test.use({ storageState: 'playwright/.auth/user.json' })
   let poManager: POManager
-  let productList: any[] = ProductList
+  let productList = products
 
   test.beforeEach(async ({ page }) => {
     poManager = new POManager(page)
@@ -19,9 +19,10 @@ test.describe("@e2e end to end ", () => {
   })
 
   for (let product of productList) {
-    test(`@smoke @regression Verify Product ${product.ProductName} displays correctly in Product List`, async () => {
-        let productName = `${product.ProductName}`
-        let productPrice = `${product.ProductPrice}`
+    test(`@smoke @regression Verify Product ${product.productName} displays correctly in Product Detail Page`, async () => {
+        let productName = `${product.productName}`
+        let productPrice = `${product.productPrice}`
+        let productImage = `${product.imgSrc}`
         
         const homePage = poManager.getHomepage()
         const productDetailPage = poManager.getProductDetailPage()
@@ -29,6 +30,8 @@ test.describe("@e2e end to end ", () => {
         await homePage.clickOnProduct(productName, productPrice)
         await productDetailPage.verifyProductDetailPageLoadsSuccessfully()
         await productDetailPage.verifyProductDetail(productName, productPrice)
+        await productDetailPage.verifyProductImageIsCorrect(productImage)
+        await productDetailPage.verifyAddToCartButtonIsVisible()
     })
   }
 

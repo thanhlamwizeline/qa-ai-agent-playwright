@@ -1,13 +1,13 @@
 import { test } from "@playwright/test"
 import { POManager } from "../../page-objects/POManager"
-import { constants } from "../../data/testdata/constants"
+import { cart } from "../../data/cartPage/cart"
 import { testconfig } from "../../data/config/testconfig"
 import { CommonActions } from "../../helpers/CommonActionsHelpers"
 import dotenv from "dotenv"
 
 dotenv.config()
 
-test.describe("@e2e end to end ", () => {
+test.describe("@feature_cartpage ", () => {
   test.use({ storageState: 'playwright/.auth/user.json' })
   let poManager: POManager
 
@@ -17,21 +17,20 @@ test.describe("@e2e end to end ", () => {
     await CommonActions.clearCart(poManager)
   })
 
-  test("@smoke Signed In User can add product to Cart successfully ", async () => {
+  test("@smoke Verify Cart page displays correct information  ", async () => {
     const homePage = poManager.getHomepage()
     const cartPage = poManager.getCartPage()
     const productDetailPage = poManager.getProductDetailPage()
-    let productName = constants.productdata.productName
-    let productPrice = constants.productdata.productPrice.toString()
-    let total = constants.productdata.total.toString()
+    let productName = cart.productName
+    let productPrice = cart.productPrice.toString()
+    let total = cart.total.toString()
 
     await homePage.clickOnProduct(productName, productPrice)
-    await productDetailPage.verifyProductDetailPageLoadsSuccessfully()
-    await productDetailPage.verifyProductDetail(productName, productPrice)
     await productDetailPage.addToCart()
     await homePage.goToCart()
     await cartPage.verifyProductInCart(productName, productPrice)
     await cartPage.verifyTotalAmount(total)
+    await cartPage.verifyPlaceOrderButtonIsVisible()
   })
 
 })
