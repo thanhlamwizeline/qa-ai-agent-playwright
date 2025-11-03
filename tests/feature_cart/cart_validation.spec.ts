@@ -25,12 +25,23 @@ test.describe("@feature_cartpage ", () => {
     let productPrice = cart.productPrice.toString()
     let total = cart.total.toString()
 
-    await homePage.clickOnProduct(productName, productPrice)
-    await productDetailPage.addToCart()
-    await homePage.goToCart()
-    await cartPage.verifyProductInCart(productName, productPrice)
-    await cartPage.verifyTotalAmount(total)
-    await cartPage.verifyPlaceOrderButtonIsVisible()
+    await test.step('Add product to cart from homepage', async () => {
+      await homePage.clickOnProduct(productName, productPrice)
+      await productDetailPage.addToCart()
+    })
+
+    await test.step('Navigate to cart page', async () => {
+      await homePage.goToCart()
+    })
+
+    await test.step('Verify cart contents and pricing', async () => {
+      await cartPage.verifyProductInCart(productName, productPrice)
+      await cartPage.verifyTotalAmount(total)
+    })
+
+    await test.step('Verify checkout functionality is available', async () => {
+      await cartPage.verifyPlaceOrderButtonIsVisible()
+    })
   })
 
 })

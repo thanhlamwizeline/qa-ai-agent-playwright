@@ -2,31 +2,33 @@
  * Static test data constants organized by category
  */
 
-import type { 
-  User, 
+import type {
+  User,
   PaymentMethod
 } from './data-interfaces';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export const USERS: Record<string, User> = {
-  ADMIN: {
-    userName: 'Admin',
-    password: 'Admin@123',
-    firstName: 'Admin',
-    lastName: 'User',
-    role: 'admin',
-  },
   STANDARD_CUSTOMER: {
-    userName: 'qatest',
-    password: '123456',
+    userName: process.env.username as string,
+    password: process.env.password as string,
     role: 'customer',
   },
-  INVALID_USER: {
-    email: 'invalid@example.com',
-    userName: 'invaliduser',
+  INVALID_USER_1: {
+    userName: process.env.username as string,
     password: 'WrongPassword',
     firstName: 'Invalid',
-    lastName: 'User',
+    lastName: 'User 1',
     role: 'customer',
+  },
+  INVALID_USER_2: {
+  userName: 'invaliduser',
+  password: 'WrongPassword',
+  firstName: 'Invalid',
+  lastName: 'User 2',
+  role: 'customer',
   },
 };
 
