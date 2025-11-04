@@ -1,15 +1,15 @@
 import { Locator, Page, expect } from '@playwright/test'
 import { TestHelpers } from '../helpers/TestHelpers'
 import {testconfig} from '../data/config/testconfig.ts'
+import { BasePage } from './BasePage'
 
-export class ProductDetailPage {
-  private readonly page: Page
+export class ProductDetailPage extends BasePage {
   private readonly btn_AddToCart: Locator
   private readonly card_DetailBox: Locator
   private readonly product_Image: Locator
 
   constructor(page: Page) {
-    this.page = page
+    super(page)
     this.btn_AddToCart = page.getByRole('link', { name: 'Add to cart' })
     this.card_DetailBox = page.locator('#tbodyid')
     this.product_Image = page.locator('.product-image img')

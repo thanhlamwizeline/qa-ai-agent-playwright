@@ -20,14 +20,9 @@ test.describe("@login Login tests", () => {
     const username = loginUser.VALID_USER.userName
     const password = loginUser.VALID_USER.password
 
-    await test.step("Login with valid credentials", async () => {
-      await CommonActions.login(poManager, username, password)
-    })
-
-    await test.step("Verify login success message appears", async () => {
-      const loginPage = poManager.getLoginPage()
-      await loginPage.verifyLoginSuccessfully(username)
-    })
+    await CommonActions.login(poManager, username, password)
+    const loginPage = poManager.getLoginPage()
+    await loginPage.verifyLoginSuccessfully(username)
   })
 
   const invalidCredentials = [ loginUser.INVALID_USER_1, loginUser.INVALID_USER_2]
@@ -36,15 +31,10 @@ test.describe("@login Login tests", () => {
     test(`@negative Login should fail when username="${data.userName}" or password="${data.password}"`, async () => {
       const loginPage = poManager.getLoginPage()
 
-      await test.step("Attempt login with invalid credentials", async () => {
-        await poManager.getHomepage().clickLogin()
-        await loginPage.login(data.userName, data.password)
-      })
-
-      await test.step("Verify login failed dialog message", async () => {
-        await loginPage.verifyLoginFailedDialogIsDisplayed()
-        await loginPage.verifyLoginFailedMessage(data.expectedMessage)
-      })
+      await poManager.getHomepage().clickLogin()
+      await loginPage.login(data.userName, data.password)
+      await loginPage.verifyLoginFailedDialogIsDisplayed()
+      await loginPage.verifyLoginFailedMessage(data.expectedMessage)
     })
   }
 })
