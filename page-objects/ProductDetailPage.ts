@@ -1,6 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test'
 import { TestHelpers } from '../helpers/TestHelpers'
-import {testconfig} from '../data/config/testconfig.ts'
+import { TESTCONFIG } from '../data/config/testconfig.ts'
 import { BasePage } from './BasePage'
 
 export class ProductDetailPage extends BasePage {
@@ -16,7 +16,7 @@ export class ProductDetailPage extends BasePage {
   }
 
   async verifyProductDetailPageLoadsSuccessfully() {
-    const prodURL = `${process.env.BASE_URL_E2E}/${testconfig.FE_URL.URL_PRODUCPAGE}`
+    const prodURL = `${process.env.BASE_URL_E2E}/${TESTCONFIG.FE_URL.URL_PRODUCPAGE}`
     await this.page.waitForURL(new RegExp(`^${prodURL}`))
   }
 

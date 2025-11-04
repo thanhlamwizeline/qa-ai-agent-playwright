@@ -1,6 +1,6 @@
 import {USERS} from "../constants"
 
-export const loginUser = {
+export const LOGIN_USER = {
   VALID_USER: {
     userName: USERS.STANDARD_CUSTOMER.userName,
     password: USERS.STANDARD_CUSTOMER.password

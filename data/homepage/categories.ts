@@ -1,1 +1,1 @@
-export const categories = ['Phones','Laptops','Monitors']
+export const CATEGORIES = ['Phones','Laptops','Monitors']
