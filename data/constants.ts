@@ -2,11 +2,12 @@
  * Static test data constants organized by category
  */
 
+import dotenv from 'dotenv';
+
 import type {
   User,
   PaymentMethod
 } from './data-interfaces';
-import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -24,11 +25,11 @@ export const USERS: Record<string, User> = {
     role: 'customer',
   },
   INVALID_USER_2: {
-  userName: 'invaliduser',
-  password: 'WrongPassword',
-  firstName: 'Invalid',
-  lastName: 'User 2',
-  role: 'customer',
+    userName: 'invaliduser',
+    password: 'WrongPassword',
+    firstName: 'Invalid',
+    lastName: 'User 2',
+    role: 'customer',
   },
 };
 

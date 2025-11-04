@@ -1,4 +1,4 @@
-import {USERS} from "../constants"
+import {USERS} from '../constants';
 
 export const LOGIN_USER = {
   VALID_USER: {
@@ -15,4 +15,4 @@ export const LOGIN_USER = {
     password: USERS.INVALID_USER_2.password,
     expectedMessage: 'Wrong password.',
   },
-}
+};

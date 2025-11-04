@@ -1,37 +1,38 @@
-import { LoginPage } from "./LoginPage"
-import { Homepage } from "./HomePage"
-import { ProductDetailPage } from "./ProductDetailPage"
-import { CartPage } from "./CartPage"
-import { Page } from "@playwright/test"
+import { Page } from '@playwright/test';
+
+import { CartPage } from './CartPage';
+import { Homepage } from './HomePage';
+import { LoginPage } from './LoginPage';
+import { ProductDetailPage } from './ProductDetailPage';
 
 export class POManager {
-    private readonly page: Page
-    private readonly loginPage: LoginPage
-    private readonly homepage: Homepage
-    private readonly productDetailPage: ProductDetailPage
-    private readonly cartPage: CartPage
+  private readonly page: Page;
+  private readonly loginPage: LoginPage;
+  private readonly homepage: Homepage;
+  private readonly productDetailPage: ProductDetailPage;
+  private readonly cartPage: CartPage;
     
-    constructor(page: Page){
-        this.page = page
-        this.loginPage = new LoginPage(this.page)
-        this.homepage = new Homepage(this.page)
-        this.productDetailPage = new ProductDetailPage(this.page)
-        this.cartPage = new CartPage(this.page)
-    }
+  constructor(page: Page){
+    this.page = page;
+    this.loginPage = new LoginPage(this.page);
+    this.homepage = new Homepage(this.page);
+    this.productDetailPage = new ProductDetailPage(this.page);
+    this.cartPage = new CartPage(this.page);
+  }
 
-    getLoginPage(){
-        return this.loginPage
-    }
+  getLoginPage(){
+    return this.loginPage;
+  }
 
-    getHomepage(){
-        return this.homepage
-    }
+  getHomepage(){
+    return this.homepage;
+  }
 
-    getProductDetailPage(){
-        return this.productDetailPage
-    }
+  getProductDetailPage(){
+    return this.productDetailPage;
+  }
 
-    getCartPage(){
-        return this.cartPage
-    }
+  getCartPage(){
+    return this.cartPage;
+  }
 }
