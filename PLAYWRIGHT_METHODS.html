@@ -1,0 +1,1913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Page Methods Reference for AI Test Case Generation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .search-container {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            font-size: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+            display: none;
+        }
+
+        .search-clear:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+
+        .search-clear.visible {
+            display: block;
+        }
+
+        .search-help {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .search-results {
+            margin-top: 20px;
+        }
+
+        .search-stats {
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            background: #667eea;
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .section-header:hover {
+            background: #5a6fd8;
+        }
+
+        .section-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .section-toggle:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .section-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .section-content.collapsed {
+            max-height: 0;
+        }
+
+        .method-item {
+            padding: 25px 30px;
+            border-bottom: 1px solid #f1f3f4;
+            transition: background-color 0.2s ease;
+        }
+
+        .method-item:last-child {
+            border-bottom: none;
+        }
+
+        .method-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .method-signature {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .method-name {
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        .method-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-content {
+            color: #6c757d;
+        }
+
+        .parameters-list {
+            list-style: none;
+        }
+
+        .parameters-list li {
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 4px;
+            border-left: 3px solid #28a745;
+        }
+
+        .param-name {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .param-type {
+            font-family: monospace;
+            color: #667eea;
+            font-size: 12px;
+        }
+
+        .example-code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            color: #495057;
+            overflow-x: auto;
+        }
+
+        .location-link {
+            font-family: monospace;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 13px;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+
+        .location-link:hover {
+            background: #e9ecef;
+            text-decoration: underline;
+        }
+
+        .method-type-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .common-badge {
+            background: #28a745;
+            color: white;
+        }
+
+        .page-object-badge {
+            background: #007bff;
+            color: white;
+        }
+
+        .highlight {
+            background-color: #ff6b6b;
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .copy-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: #e2e8f0;
+            padding: 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            transition: background-color 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .copy-btn.copied {
+            background: #28a745;
+            color: white;
+        }
+
+        .toc {
+            background: white;
+            border-radius: 12px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .toc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 0;
+        }
+
+        .toc-header h3 {
+            margin: 0;
+            color: #495057;
+        }
+
+        .toc-toggle {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #667eea;
+            transition: transform 0.3s ease;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .toc-toggle:hover {
+            background: #f8f9fa;
+        }
+
+        .toc-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .toc-content.collapsed {
+            max-height: 0;
+        }
+
+        .toc-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .toc-list li {
+            margin-bottom: 8px;
+        }
+
+        .toc-list a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+
+        .toc-list a:hover {
+            background-color: #f8f9fa;
+            text-decoration: underline;
+        }
+
+        .method-count {
+            background: #e9ecef;
+            color: #6c757d;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .steps-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            table-layout: fixed;
+        }
+
+        .steps-table th {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .steps-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: top;
+            text-align: left;
+        }
+
+        .steps-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .steps-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-step-pattern {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 13px;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow-x: auto;
+            position: relative;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .step-text {
+            flex: 1;
+            white-space: nowrap;
+            overflow-x: auto;
+            text-align: left;
+            min-width: 0;
+        }
+
+        .copy-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: #e2e8f0;
+            padding: 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: auto;
+            margin-right: 0;
+            transition: background-color 0.2s ease;
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .copy-btn.copied {
+            background: #28a745;
+            color: white;
+        }
+
+        .table-step-type {
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        .table-parameters {
+            font-size: 13px;
+        }
+
+        .table-param-item {
+            background: #f8f9fa;
+            padding: 4px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+            border-left: 3px solid #28a745;
+        }
+
+        .table-param-type {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #495057;
+            font-size: 11px;
+        }
+
+        .table-purpose {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .table-location {
+            font-family: monospace;
+            font-size: 11px;
+            color: #667eea;
+        }
+
+        .scrollable {
+            overflow-x: auto;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+
+        .scrollable::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .method-details {
+                grid-template-columns: 1fr;
+            }
+
+            .search-container, .section, .toc {
+                padding: 20px;
+            }
+
+            .method-item {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Available Page Methods Reference for AI Test Case Generation</h1>
+            <p>Total Methods: 25 <span style="font-size: 0.8em;">(Last generated: 2025-11-04 08:48:42 - UTC)</span></p>
+        </div>
+
+        <div class="search-container">
+            <div class="search-wrapper">
+                <input type="text" id="searchBox" class="search-box" placeholder="Search methods... (e.g., 'login', 'verify', 'click', 'clearCart')" autocomplete="off">
+                <button id="searchClear" class="search-clear" onclick="clearSearch()">✕</button>
+            </div>
+            <div class="search-help">
+                💡 <strong>Search tips:</strong> Type method names, class names, or keywords to find relevant methods.
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+
+        <div id="tableOfContents" class="toc">
+            <div class="toc-header" onclick="toggleToc()">
+                <h3>📚 Table of Contents</h3>
+                <button class="toc-toggle" id="tocToggle">▼</button>
+            </div>
+            <div class="toc-content" id="tocContent">
+                <ul class="toc-list">
+                <li><a href="#common-methods">Common Actions <span class="method-count">2 methods</span></a></li>
+                <li><a href="#cartpage">CartPage <span class="method-count">5 methods</span></a></li>
+                <li><a href="#homepage">Homepage <span class="method-count">9 methods</span></a></li>
+                <li><a href="#loginpage">LoginPage <span class="method-count">4 methods</span></a></li>
+                <li><a href="#productdetailpage">ProductDetailPage <span class="method-count">5 methods</span></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="allMethods">
+
+        <div class="section" id="common-methods">
+            <div class="section-header" onclick="toggleSection('common-methods')">
+                <span>🔧 CommonActions (2 methods)</span>
+                <button class="section-toggle" id="toggle_common-methods">▼</button>
+            </div>
+            <div class="section-content" id="content_common-methods">
+                <div class="table-wrapper">
+                    <table class="steps-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%; text-align: left;">Method</th>
+                                <th style="width: 25%;">Parameters</th>
+                                <th style="width: 25%;">Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">clearCart</span>(poManager: POManager)
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('clearCart', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">helpers/CommonActionsHelpers.ts:5</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">poManager: POManager</span> - POManager parameter</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Clear all items from cart</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">login</span>(poManager: POManager, username: string, password: string)
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('login', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">helpers/CommonActionsHelpers.ts:12</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">poManager: POManager</span> - POManager parameter</div><div class="table-param-item"><span class="table-param-type">username: string</span> - Username for login/identification</div><div class="table-param-item"><span class="table-param-type">password: string</span> - Password for authentication</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Execute common utility: login</div>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="cartpage">
+            <div class="section-header" onclick="toggleSection('cartpage')">
+                <span>📄 CartPage (5 methods)</span>
+                <button class="section-toggle" id="toggle_cartpage">▼</button>
+            </div>
+            <div class="section-content" id="content_cartpage">
+                <div class="table-wrapper">
+                    <table class="steps-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%; text-align: left;">Method</th>
+                                <th style="width: 25%;">Parameters</th>
+                                <th style="width: 25%;">Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyCartPageLoadsSuccessfully</span>()
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyCartPageLoadsSuccessfully', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/CartPage.ts:20</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">None</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify cart page loads successfully' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyProductInCart</span>(productName: string, productPrice: string)
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyProductInCart', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/CartPage.ts:26</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">productName: string</span> - Product name to interact with</div><div class="table-param-item"><span class="table-param-type">productPrice: string</span> - Product price value</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify product in cart' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyTotalAmount</span>(amount: string)
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyTotalAmount', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/CartPage.ts:31</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">amount: string</span> - String value</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify total amount' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyPlaceOrderButtonIsVisible</span>()
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyPlaceOrderButtonIsVisible', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/CartPage.ts:35</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">None</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify place order button is visible' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">clearCart</span>()
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('clearCart', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/CartPage.ts:39</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">None</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Clear all items from cart</div>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="homepage">
+            <div class="section-header" onclick="toggleSection('homepage')">
+                <span>📄 Homepage (9 methods)</span>
+                <button class="section-toggle" id="toggle_homepage">▼</button>
+            </div>
+            <div class="section-content" id="content_homepage">
+                <div class="table-wrapper">
+                    <table class="steps-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%; text-align: left;">Method</th>
+                                <th style="width: 25%;">Parameters</th>
+                                <th style="width: 25%;">Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyWelcomUsernameOnNavigationBar</span>(username: string)
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyWelcomUsernameOnNavigationBar', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/HomePage.ts:20</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">username: string</span> - Username for login/identification</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify welcom username on navigation bar' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">clickLogin</span>()
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('clickLogin', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/HomePage.ts:24</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">None</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Click on login button or link</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">goToCart</span>()
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('goToCart', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/HomePage.ts:28</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">None</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Navigate to a specific page or URL</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">clickOnProduct</span>(productName: string, productPrice: string)
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('clickOnProduct', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/HomePage.ts:32</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">productName: string</span> - Product name to interact with</div><div class="table-param-item"><span class="table-param-type">productPrice: string</span> - Product price value</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Click on a product to view details</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyLogoutNavLinkVisibleOnHomePage</span>()
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyLogoutNavLinkVisibleOnHomePage', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/HomePage.ts:40</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">None</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify logout nav link visible on home page' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">getProductImg</span>(productName: string)
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('getProductImg', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/HomePage.ts:44</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">productName: string</span> - Product name to interact with</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'get product img' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyCarouselIsVisible</span>()
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyCarouselIsVisible', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/HomePage.ts:51</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">None</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify carousel is visible' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyCatergoryMenuContainsCorrectItems</span>(items: string[])
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyCatergoryMenuContainsCorrectItems', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/HomePage.ts:55</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">items: string[]</span> - string[] parameter</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify catergory menu contains correct items' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyProductListIsVisible</span>()
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyProductListIsVisible', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/HomePage.ts:61</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">None</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify product list is visible' operation</div>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="loginpage">
+            <div class="section-header" onclick="toggleSection('loginpage')">
+                <span>📄 LoginPage (4 methods)</span>
+                <button class="section-toggle" id="toggle_loginpage">▼</button>
+            </div>
+            <div class="section-content" id="content_loginpage">
+                <div class="table-wrapper">
+                    <table class="steps-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%; text-align: left;">Method</th>
+                                <th style="width: 25%;">Parameters</th>
+                                <th style="width: 25%;">Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">login</span>(username: string, password: string)
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('login', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/LoginPage.ts:19</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">username: string</span> - Username for login/identification</div><div class="table-param-item"><span class="table-param-type">password: string</span> - Password for authentication</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'login' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyLoginSuccessfully</span>(displayUserName: string)
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyLoginSuccessfully', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/LoginPage.ts:28</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">displayUserName: string</span> - Username for login/identification</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify login successfully' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyLoginFailedDialogIsDisplayed</span>()
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyLoginFailedDialogIsDisplayed', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/LoginPage.ts:32</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">None</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify login failed dialog is displayed' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyLoginFailedMessage</span>(loginFailedMessage: string)
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyLoginFailedMessage', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/LoginPage.ts:36</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">loginFailedMessage: string</span> - Text content or message</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify login failed message' operation</div>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="productdetailpage">
+            <div class="section-header" onclick="toggleSection('productdetailpage')">
+                <span>📄 ProductDetailPage (5 methods)</span>
+                <button class="section-toggle" id="toggle_productdetailpage">▼</button>
+            </div>
+            <div class="section-content" id="content_productdetailpage">
+                <div class="table-wrapper">
+                    <table class="steps-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%; text-align: left;">Method</th>
+                                <th style="width: 25%;">Parameters</th>
+                                <th style="width: 25%;">Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyProductDetailPageLoadsSuccessfully</span>()
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyProductDetailPageLoadsSuccessfully', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/ProductDetailPage.ts:17</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">None</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify product detail page loads successfully' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyProductDetail</span>(productName: string, productPrice: string)
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyProductDetail', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/ProductDetailPage.ts:22</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">productName: string</span> - Product name to interact with</div><div class="table-param-item"><span class="table-param-type">productPrice: string</span> - Product price value</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify product detail' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyProductImageIsCorrect</span>(imageSrc: string)
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyProductImageIsCorrect', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/ProductDetailPage.ts:29</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters"><div class="table-param-item"><span class="table-param-type">imageSrc: string</span> - String value</div></div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify product image is correct' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">verifyAddToCartButtonIsVisible</span>()
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('verifyAddToCartButtonIsVisible', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/ProductDetailPage.ts:33</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">None</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'verify add to cart button is visible' operation</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">addToCart</span>()
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('addToCart', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-location">page-objects/ProductDetailPage.ts:37</div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">None</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">Perform 'add to cart' operation</div>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Method definitions data
+        const methodDefinitions = [
+  {
+    "class_name": "CommonActions",
+    "method_name": "clearCart",
+    "parameters": "poManager: POManager",
+    "return_type": "Promise<void>",
+    "location": "helpers/CommonActionsHelpers.ts:5",
+    "method_type": "common",
+    "parsed_params": [
+      {
+        "name": "poManager",
+        "type": "POManager",
+        "description": "POManager parameter"
+      }
+    ],
+    "purpose": "Clear all items from cart"
+  },
+  {
+    "class_name": "CommonActions",
+    "method_name": "login",
+    "parameters": "poManager: POManager, username: string, password: string",
+    "return_type": "Promise<void>",
+    "location": "helpers/CommonActionsHelpers.ts:12",
+    "method_type": "common",
+    "parsed_params": [
+      {
+        "name": "poManager",
+        "type": "POManager",
+        "description": "POManager parameter"
+      },
+      {
+        "name": "username",
+        "type": "string",
+        "description": "Username for login/identification"
+      },
+      {
+        "name": "password",
+        "type": "string",
+        "description": "Password for authentication"
+      }
+    ],
+    "purpose": "Execute common utility: login"
+  },
+  {
+    "class_name": "CartPage",
+    "method_name": "verifyCartPageLoadsSuccessfully",
+    "parameters": "",
+    "return_type": "Promise<void>",
+    "location": "page-objects/CartPage.ts:20",
+    "method_type": "page_object",
+    "parsed_params": [],
+    "purpose": "Perform 'verify cart page loads successfully' operation"
+  },
+  {
+    "class_name": "CartPage",
+    "method_name": "verifyProductInCart",
+    "parameters": "productName: string, productPrice: string",
+    "return_type": "Promise<void>",
+    "location": "page-objects/CartPage.ts:26",
+    "method_type": "page_object",
+    "parsed_params": [
+      {
+        "name": "productName",
+        "type": "string",
+        "description": "Product name to interact with"
+      },
+      {
+        "name": "productPrice",
+        "type": "string",
+        "description": "Product price value"
+      }
+    ],
+    "purpose": "Perform 'verify product in cart' operation"
+  },
+  {
+    "class_name": "CartPage",
+    "method_name": "verifyTotalAmount",
+    "parameters": "amount: string",
+    "return_type": "Promise<void>",
+    "location": "page-objects/CartPage.ts:31",
+    "method_type": "page_object",
+    "parsed_params": [
+      {
+        "name": "amount",
+        "type": "string",
+        "description": "String value"
+      }
+    ],
+    "purpose": "Perform 'verify total amount' operation"
+  },
+  {
+    "class_name": "CartPage",
+    "method_name": "verifyPlaceOrderButtonIsVisible",
+    "parameters": "",
+    "return_type": "Promise<void>",
+    "location": "page-objects/CartPage.ts:35",
+    "method_type": "page_object",
+    "parsed_params": [],
+    "purpose": "Perform 'verify place order button is visible' operation"
+  },
+  {
+    "class_name": "CartPage",
+    "method_name": "clearCart",
+    "parameters": "",
+    "return_type": "Promise<void>",
+    "location": "page-objects/CartPage.ts:39",
+    "method_type": "page_object",
+    "parsed_params": [],
+    "purpose": "Clear all items from cart"
+  },
+  {
+    "class_name": "Homepage",
+    "method_name": "verifyWelcomUsernameOnNavigationBar",
+    "parameters": "username: string",
+    "return_type": "Promise<void>",
+    "location": "page-objects/HomePage.ts:20",
+    "method_type": "page_object",
+    "parsed_params": [
+      {
+        "name": "username",
+        "type": "string",
+        "description": "Username for login/identification"
+      }
+    ],
+    "purpose": "Perform 'verify welcom username on navigation bar' operation"
+  },
+  {
+    "class_name": "Homepage",
+    "method_name": "clickLogin",
+    "parameters": "",
+    "return_type": "Promise<void>",
+    "location": "page-objects/HomePage.ts:24",
+    "method_type": "page_object",
+    "parsed_params": [],
+    "purpose": "Click on login button or link"
+  },
+  {
+    "class_name": "Homepage",
+    "method_name": "goToCart",
+    "parameters": "",
+    "return_type": "Promise<void>",
+    "location": "page-objects/HomePage.ts:28",
+    "method_type": "page_object",
+    "parsed_params": [],
+    "purpose": "Navigate to a specific page or URL"
+  },
+  {
+    "class_name": "Homepage",
+    "method_name": "clickOnProduct",
+    "parameters": "productName: string, productPrice: string",
+    "return_type": "Promise<void>",
+    "location": "page-objects/HomePage.ts:32",
+    "method_type": "page_object",
+    "parsed_params": [
+      {
+        "name": "productName",
+        "type": "string",
+        "description": "Product name to interact with"
+      },
+      {
+        "name": "productPrice",
+        "type": "string",
+        "description": "Product price value"
+      }
+    ],
+    "purpose": "Click on a product to view details"
+  },
+  {
+    "class_name": "Homepage",
+    "method_name": "verifyLogoutNavLinkVisibleOnHomePage",
+    "parameters": "",
+    "return_type": "Promise<void>",
+    "location": "page-objects/HomePage.ts:40",
+    "method_type": "page_object",
+    "parsed_params": [],
+    "purpose": "Perform 'verify logout nav link visible on home page' operation"
+  },
+  {
+    "class_name": "Homepage",
+    "method_name": "getProductImg",
+    "parameters": "productName: string",
+    "return_type": "Promise<Locator>",
+    "location": "page-objects/HomePage.ts:44",
+    "method_type": "page_object",
+    "parsed_params": [
+      {
+        "name": "productName",
+        "type": "string",
+        "description": "Product name to interact with"
+      }
+    ],
+    "purpose": "Perform 'get product img' operation"
+  },
+  {
+    "class_name": "Homepage",
+    "method_name": "verifyCarouselIsVisible",
+    "parameters": "",
+    "return_type": "Promise<void>",
+    "location": "page-objects/HomePage.ts:51",
+    "method_type": "page_object",
+    "parsed_params": [],
+    "purpose": "Perform 'verify carousel is visible' operation"
+  },
+  {
+    "class_name": "Homepage",
+    "method_name": "verifyCatergoryMenuContainsCorrectItems",
+    "parameters": "items: string[]",
+    "return_type": "Promise<void>",
+    "location": "page-objects/HomePage.ts:55",
+    "method_type": "page_object",
+    "parsed_params": [
+      {
+        "name": "items",
+        "type": "string[]",
+        "description": "string[] parameter"
+      }
+    ],
+    "purpose": "Perform 'verify catergory menu contains correct items' operation"
+  },
+  {
+    "class_name": "Homepage",
+    "method_name": "verifyProductListIsVisible",
+    "parameters": "",
+    "return_type": "Promise<void>",
+    "location": "page-objects/HomePage.ts:61",
+    "method_type": "page_object",
+    "parsed_params": [],
+    "purpose": "Perform 'verify product list is visible' operation"
+  },
+  {
+    "class_name": "LoginPage",
+    "method_name": "login",
+    "parameters": "username: string, password: string",
+    "return_type": "Promise<void>",
+    "location": "page-objects/LoginPage.ts:19",
+    "method_type": "page_object",
+    "parsed_params": [
+      {
+        "name": "username",
+        "type": "string",
+        "description": "Username for login/identification"
+      },
+      {
+        "name": "password",
+        "type": "string",
+        "description": "Password for authentication"
+      }
+    ],
+    "purpose": "Perform 'login' operation"
+  },
+  {
+    "class_name": "LoginPage",
+    "method_name": "verifyLoginSuccessfully",
+    "parameters": "displayUserName: string",
+    "return_type": "Promise<void>",
+    "location": "page-objects/LoginPage.ts:28",
+    "method_type": "page_object",
+    "parsed_params": [
+      {
+        "name": "displayUserName",
+        "type": "string",
+        "description": "Username for login/identification"
+      }
+    ],
+    "purpose": "Perform 'verify login successfully' operation"
+  },
+  {
+    "class_name": "LoginPage",
+    "method_name": "verifyLoginFailedDialogIsDisplayed",
+    "parameters": "",
+    "return_type": "Promise<void>",
+    "location": "page-objects/LoginPage.ts:32",
+    "method_type": "page_object",
+    "parsed_params": [],
+    "purpose": "Perform 'verify login failed dialog is displayed' operation"
+  },
+  {
+    "class_name": "LoginPage",
+    "method_name": "verifyLoginFailedMessage",
+    "parameters": "loginFailedMessage: string",
+    "return_type": "Promise<void>",
+    "location": "page-objects/LoginPage.ts:36",
+    "method_type": "page_object",
+    "parsed_params": [
+      {
+        "name": "loginFailedMessage",
+        "type": "string",
+        "description": "Text content or message"
+      }
+    ],
+    "purpose": "Perform 'verify login failed message' operation"
+  },
+  {
+    "class_name": "ProductDetailPage",
+    "method_name": "verifyProductDetailPageLoadsSuccessfully",
+    "parameters": "",
+    "return_type": "Promise<void>",
+    "location": "page-objects/ProductDetailPage.ts:17",
+    "method_type": "page_object",
+    "parsed_params": [],
+    "purpose": "Perform 'verify product detail page loads successfully' operation"
+  },
+  {
+    "class_name": "ProductDetailPage",
+    "method_name": "verifyProductDetail",
+    "parameters": "productName: string, productPrice: string",
+    "return_type": "Promise<void>",
+    "location": "page-objects/ProductDetailPage.ts:22",
+    "method_type": "page_object",
+    "parsed_params": [
+      {
+        "name": "productName",
+        "type": "string",
+        "description": "Product name to interact with"
+      },
+      {
+        "name": "productPrice",
+        "type": "string",
+        "description": "Product price value"
+      }
+    ],
+    "purpose": "Perform 'verify product detail' operation"
+  },
+  {
+    "class_name": "ProductDetailPage",
+    "method_name": "verifyProductImageIsCorrect",
+    "parameters": "imageSrc: string",
+    "return_type": "Promise<void>",
+    "location": "page-objects/ProductDetailPage.ts:29",
+    "method_type": "page_object",
+    "parsed_params": [
+      {
+        "name": "imageSrc",
+        "type": "string",
+        "description": "String value"
+      }
+    ],
+    "purpose": "Perform 'verify product image is correct' operation"
+  },
+  {
+    "class_name": "ProductDetailPage",
+    "method_name": "verifyAddToCartButtonIsVisible",
+    "parameters": "",
+    "return_type": "Promise<void>",
+    "location": "page-objects/ProductDetailPage.ts:33",
+    "method_type": "page_object",
+    "parsed_params": [],
+    "purpose": "Perform 'verify add to cart button is visible' operation"
+  },
+  {
+    "class_name": "ProductDetailPage",
+    "method_name": "addToCart",
+    "parameters": "",
+    "return_type": "Promise<void>",
+    "location": "page-objects/ProductDetailPage.ts:37",
+    "method_type": "page_object",
+    "parsed_params": [],
+    "purpose": "Perform 'add to cart' operation"
+  }
+];
+
+        // Search functionality
+        const searchBox = document.getElementById('searchBox');
+        const searchClear = document.getElementById('searchClear');
+        const searchResults = document.getElementById('searchResults');
+        const allMethods = document.getElementById('allMethods');
+        const tableOfContents = document.getElementById('tableOfContents');
+
+        let searchTimeout;
+
+        searchBox.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performSearch(this.value.trim());
+                toggleClearButton();
+            }, 300);
+        });
+
+        function toggleClearButton() {
+            if (searchBox.value.length > 0) {
+                searchClear.classList.add('visible');
+            } else {
+                searchClear.classList.remove('visible');
+            }
+        }
+
+        function clearSearch() {
+            searchBox.value = '';
+            searchClear.classList.remove('visible');
+            showAllMethods();
+            searchBox.focus();
+        }
+
+        function performSearch(query) {
+            if (!query) {
+                showAllMethods();
+                return;
+            }
+
+            const results = searchMethods(query);
+            displaySearchResults(results, query);
+        }
+
+        function searchMethods(query) {
+            const queryLower = query.toLowerCase();
+            const results = [];
+
+            methodDefinitions.forEach(method => {
+                let score = 0;
+                let matches = [];
+
+                // Check method name match
+                const methodNameLower = method.method_name.toLowerCase();
+                if (methodNameLower.includes(queryLower)) {
+                    score += 100;
+                    matches.push('method_name');
+                }
+
+                // Check class name match
+                const classNameLower = method.class_name.toLowerCase();
+                if (classNameLower.includes(queryLower)) {
+                    score += 80;
+                    matches.push('class_name');
+                }
+
+                // Check purpose match
+                const purposeLower = method.purpose.toLowerCase();
+                if (purposeLower.includes(queryLower)) {
+                    score += 50;
+                    matches.push('purpose');
+                }
+
+                // Check parameters match
+                method.parsed_params.forEach(param => {
+                    if (param.name.toLowerCase().includes(queryLower)) {
+                        score += 30;
+                        matches.push('parameter');
+                    }
+                });
+
+                // Check individual words for partial matching
+                const queryWords = queryLower.split(/\s+/);
+                queryWords.forEach(word => {
+                    if (word.length > 2) {
+                        if (methodNameLower.includes(word)) score += 20;
+                        if (classNameLower.includes(word)) score += 15;
+                        if (purposeLower.includes(word)) score += 10;
+                    }
+                });
+
+                if (score > 0) {
+                    results.push({
+                        method: method,
+                        score: score,
+                        matches: matches
+                    });
+                }
+            });
+
+            // Sort by score (highest first)
+            results.sort((a, b) => b.score - a.score);
+
+            return results;
+        }
+
+        function displaySearchResults(results, query) {
+            allMethods.style.display = 'none';
+            tableOfContents.style.display = 'none';
+
+            if (results.length === 0) {
+                searchResults.innerHTML = `
+                    <div class="search-stats">No results found for "${query}"</div>
+                    <div class="no-results">
+                        <p>🔍 No matching methods found.</p>
+                        <p>Try searching for method names like "login", "verify", "click", or class names like "HomePage", "CartPage".</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `<div class="search-stats">Found ${results.length} matching method${results.length !== 1 ? 's' : ''} for "${query}"</div>`;
+
+            html += `
+                <div class="table-wrapper">
+                    <table class="steps-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%; text-align: left;">Method</th>
+                                <th style="width: 25%;">Parameters</th>
+                                <th style="width: 25%;">Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            results.forEach(result => {
+                const method = result.method;
+
+                // Parameters HTML for search results table
+                let paramsHtml = "None";
+                if (method.parsed_params && method.parsed_params.length > 0) {
+                    paramsHtml = "";
+                    method.parsed_params.forEach(param => {
+                        paramsHtml += `<div class="table-param-item"><span class="table-param-type">${param.name}: ${param.type}</span> - ${param.description}</div>`;
+                    });
+                }
+
+                // Highlight matches
+                const highlightedMethodName = highlightMatch(method.method_name, query);
+                const highlightedClassName = highlightMatch(method.class_name, query);
+                const highlightedPurpose = highlightMatch(method.purpose, query);
+
+                html += `
+                        <tr>
+                            <td>
+                                <div class="table-step-pattern">
+                                    <div class="step-text scrollable">
+                                        <span class="table-step-type">${highlightedMethodName}</span>(${method.parameters})
+                                    </div>
+                                    <button class="copy-btn" onclick="copyMethodSignature('${method.method_name}', this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">
+                                    ${highlightedClassName} | ${method.location} | Score: ${result.score}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="table-parameters">${paramsHtml}</div>
+                            </td>
+                            <td>
+                                <div class="table-purpose">${highlightedPurpose}</div>
+                            </td>
+                        </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            searchResults.innerHTML = html;
+        }
+
+        function highlightMatch(text, query) {
+            const queryLower = query.toLowerCase();
+            const textLower = text.toLowerCase();
+
+            if (!textLower.includes(queryLower)) {
+                return text;
+            }
+
+            const index = textLower.indexOf(queryLower);
+            if (index === -1) return text;
+
+            return text.substring(0, index) +
+                   '<span class="highlight">' +
+                   text.substring(index, index + query.length) +
+                   '</span>' +
+                   text.substring(index + query.length);
+        }
+
+        function showAllMethods() {
+            searchResults.innerHTML = '';
+            allMethods.style.display = 'block';
+            tableOfContents.style.display = 'block';
+        }
+
+        // Toggle section
+        function toggleSection(sectionId) {
+            const content = document.getElementById('content_' + sectionId);
+            const toggle = document.getElementById('toggle_' + sectionId);
+
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                content.style.maxHeight = content.scrollHeight + 'px';
+                toggle.textContent = '▼';
+            } else {
+                content.classList.add('collapsed');
+                content.style.maxHeight = '0';
+                toggle.textContent = '►';
+            }
+        }
+
+        // Copy method signature function
+        function copyMethodSignature(methodText, button) {
+            navigator.clipboard.writeText(methodText).then(function() {
+                // Visual feedback
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+
+                setTimeout(function() {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 1500);
+            }).catch(function(err) {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        // Focus search box on page load
+        window.addEventListener('load', function() {
+            searchBox.focus();
+
+            // Initialize all sections as expanded
+            const sections = document.querySelectorAll('[id^="content_"]');
+            sections.forEach(section => {
+                section.style.maxHeight = section.scrollHeight + 'px';
+            });
+        });
+
+        // Clear search with Escape key
+        searchBox.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                showAllMethods();
+            }
+        });
+    </script>
+</body>
+</html>
