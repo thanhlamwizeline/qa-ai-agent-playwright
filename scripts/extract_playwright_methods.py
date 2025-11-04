@@ -251,7 +251,7 @@ def generate_html(all_methods: List[PlaywrightMethod], output_file: str = 'PLAYW
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Available Mthods Reference for AI Test Case Generation</title>
+    <title>Available Page Methods Reference for AI Test Case Generation</title>
     <style>
         * {{
             margin: 0;
@@ -830,7 +830,7 @@ def generate_html(all_methods: List[PlaywrightMethod], output_file: str = 'PLAYW
 <body>
     <div class="container">
         <div class="header">
-            <h1>Available Mthods Reference for AI Test Case Generation</h1>
+            <h1>Available Page Methods Reference for AI Test Case Generation</h1>
             <p>Total Methods: {len(all_methods)} <span style="font-size: 0.8em;">(Last generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} - UTC)</span></p>
         </div>
 
