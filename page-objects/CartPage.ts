@@ -2,16 +2,16 @@ import { Locator, Page, expect } from '@playwright/test'
 import { Navigation } from './components/NavigationComponent.ts'
 import { TestHelpers } from '../helpers/TestHelpers'
 import {testconfig} from '../data/config/testconfig.ts'
+import { BasePage } from './BasePage'
 
-export class CartPage {
-  private readonly page: Page
+export class CartPage extends BasePage {
   private readonly navigationComponent: Navigation
   private readonly lbl_TotalAmount: Locator
   private readonly btn_Delete: Locator
   private readonly btn_PlaceOrder: Locator
 
   constructor(page: Page) {
-    this.page = page
+    super(page)
     this.navigationComponent = new Navigation(this.page)
     this.lbl_TotalAmount = page.locator('#totalp')
     this.btn_Delete = page.getByRole("link", {name: 'Delete'})

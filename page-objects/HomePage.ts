@@ -1,8 +1,8 @@
 import { Locator, Page, expect } from '@playwright/test'
 import { Navigation } from './components/NavigationComponent'
+import { BasePage } from './BasePage'
 
-export class Homepage {
-  private readonly page: Page
+export class Homepage extends BasePage {
   private readonly navigationComponent: Navigation
   private readonly card_ProductItem: Locator
   private readonly carousel: Locator
@@ -10,7 +10,7 @@ export class Homepage {
   private readonly productList: Locator
 
   constructor(page: Page) {
-    this.page = page
+    super(page)
     this.navigationComponent = new Navigation(this.page)
     this.card_ProductItem = page.locator("//div[@class='card-block']")
     this.carousel = page.locator('#carouselExampleIndicators')

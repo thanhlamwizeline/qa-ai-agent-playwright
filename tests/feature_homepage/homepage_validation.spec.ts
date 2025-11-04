@@ -18,17 +18,9 @@ test.describe("@feature_homepage ", () => {
   test('Homepage is loaded with Carousel, Category menu and Product list', async () => {
     const homePage = poManager.getHomepage()
 
-    await test.step('Verify carousel is displayed', async () => {
-      await homePage.verifyCarouselIsVisible()
-    })
-
-    await test.step('Verify category menu contains correct items', async () => {
-      await homePage.verifyCatergoryMenuContainsCorrectItems(homepageCategories)
-    })
-
-    await test.step('Verify product list is visible', async () => {
-      await homePage.verifyProductListIsVisible()
-    })
+    await homePage.verifyCarouselIsVisible()
+    await homePage.verifyCatergoryMenuContainsCorrectItems(homepageCategories)
+    await homePage.verifyProductListIsVisible()
   })
 
 })

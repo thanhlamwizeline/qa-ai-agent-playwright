@@ -1,8 +1,8 @@
 import { Locator, Page, expect, Dialog } from '@playwright/test'
 import { Navigation } from './components/NavigationComponent'
+import { BasePage } from './BasePage'
 
-export class LoginPage {
-  private readonly page: Page
+export class LoginPage extends BasePage {
   private readonly navigationComponent: Navigation
   private readonly txt_Username: Locator
   private readonly txt_Password: Locator
@@ -10,7 +10,7 @@ export class LoginPage {
   private dialog_LoginMessage!: Dialog
 
   constructor(page: Page) {
-    this.page = page
+    super(page)
     this.navigationComponent = new Navigation(this.page)
     this.txt_Username = page.locator('#loginusername')
     this.txt_Password = page.locator('#loginpassword')
