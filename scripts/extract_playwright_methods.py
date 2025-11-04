@@ -4,7 +4,7 @@ Generate HTML version of Playwright native methods with search functionality.
 
 Usage:
     python scripts/extract_playwright_methods.py
-    python scripts/extract_playwright_methods.py --output PLAYWRIGHT_METHODS.html
+    python scripts/extract_playwright_methods.py --output PAGE-METHODS-REFERENCE.html
 """
 
 import re
@@ -227,7 +227,7 @@ def extract_methods_from_page_object(file_path: Path, relative_path: str) -> Lis
     return methods
 
 
-def generate_html(all_methods: List[PlaywrightMethod], output_file: str = 'PLAYWRIGHT_METHODS.html'):
+def generate_html(all_methods: List[PlaywrightMethod], output_file: str = 'PAGE-METHODS-REFERENCE.html'):
     """Generate HTML documentation with search functionality."""
 
     # Group by type and class
@@ -1280,8 +1280,8 @@ def main():
     parser.add_argument(
         '--output',
         '-o',
-        default='PLAYWRIGHT_METHODS.html',
-        help='Output HTML file (default: PLAYWRIGHT_METHODS.html)'
+        default='PAGE-METHODS-REFERENCE.html',
+        help='Output HTML file (default: PAGE-METHODS-REFERENCE.html)'
     )
 
     args = parser.parse_args()

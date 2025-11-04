@@ -30,7 +30,7 @@ jobs:
         run: |
           pip install -r requirements.txt || true
 
-      # 4. Run Python script to generate PLAYWRIGHT_METHODS.html
+      # 4. Run Python script to generate PAGE-METHODS-REFERENCE.html
       - name: Generate page methods HTML
         run: |
           python scripts/extract_playwright_methods.py
@@ -38,7 +38,7 @@ jobs:
       # 5. Commit and push generated HTML to main branch
       - name: Commit generated HTML
         run: |
-          if [ -f PLAYWRIGHT_METHODS.html ]; then
+          if [ -f PAGE-METHODS-REFERENCE.html ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -48,13 +48,13 @@ jobs:
             git pull origin main --no-rebase --strategy-option=theirs
 
             # Add and commit generated file
-            git add PLAYWRIGHT_METHODS.html
-            git commit -m "update PLAYWRIGHT_METHODS.html" || echo "No changes to commit"
+            git add PAGE-METHODS-REFERENCE.html
+            git commit -m "update PAGE-METHODS-REFERENCE.html" || echo "No changes to commit"
 
             # Push changes to remote (force to ensure overwrite if needed)
             git push origin main
           else
-            echo "PLAYWRIGHT_METHODS.html not found — skipping commit."
+            echo "PAGE-METHODS-REFERENCE.html not found — skipping commit."
           fi
 
 
@@ -62,7 +62,7 @@ jobs:
       - name: Prepare HTML for Pages
         run: |
           mkdir -p public
-          cp PLAYWRIGHT_METHODS.html public/index.html
+          cp PAGE-METHODS-REFERENCE.html public/index.html
 
       # 7. Upload artifact to GitHub Pages
       - name: Upload artifact for GitHub Pages
