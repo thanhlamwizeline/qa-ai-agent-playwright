@@ -1,7 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test'
 import { Navigation } from './components/NavigationComponent.ts'
 import { TestHelpers } from '../helpers/TestHelpers'
-import {testconfig} from '../data/config/testconfig.ts'
+import { TESTCONFIG } from '../data/config/testconfig.ts'
 import { BasePage } from './BasePage'
 
 export class CartPage extends BasePage {
@@ -19,7 +19,7 @@ export class CartPage extends BasePage {
   }
 
   async verifyCartPageLoadsSuccessfully() {
-    const cartURL = `${process.env.BASE_URL_E2E}/${testconfig.FE_URL.URL_CARTPAGE}`
+    const cartURL = `${process.env.BASE_URL_E2E}/${TESTCONFIG.FE_URL.URL_CARTPAGE}`
     await this.page.waitForURL(new RegExp(`^${cartURL}`))
     await this.page.waitForLoadState("load")
   }

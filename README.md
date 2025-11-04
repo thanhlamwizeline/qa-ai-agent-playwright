@@ -21,7 +21,7 @@
   ```shell
   npm install
   ```
-  
+
 ## Test commands
 
 The project includes a set of tests to ensure the stability and correct functionality of the application. The testing framework is built with [Playwright](https://playwright.dev). You can run the tests using the following commands:
@@ -30,7 +30,7 @@ The project includes a set of tests to ensure the stability and correct function
     ```shell
     npm run tests:e2e
     ```
-    
+
 - Run Test on all browsers (Chrome, Firefox, Edge):
     ```shell
     npm run tests:e2e-allbrowsers
@@ -94,7 +94,7 @@ tests/
 
 .gitignore
 README.md
-CONVENTIONS.md  
+CONVENTIONS.md
 ```
 ## GitHub Actions
 Make sure to create Actions Secrets for each environment variable stated above. This is used to create a .env file for the GitHub Actions executions.
@@ -115,3 +115,6 @@ Below are the sample scripts that we can run with npm run {scriptname} like `npm
 "tests:e2e-edge": "npx playwright test --project=TestOnEdge",
 "tests:e2e-allbrowsers": "npx playwright test --project=MultiBrowser",
 ```
+
+## Page Methods Reference
+*  https://wizeline.github.io/qa-ai-agent-playwright-native-typescript-automation/

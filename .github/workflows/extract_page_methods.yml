@@ -1,0 +1,84 @@
+name: Extract Page Methods and Deploy to Github page
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # allows manual run from GitHub UI
+
+permissions:
+  contents: write      # needed to push generated HTML back to repo
+  pages: write         # needed to deploy to GitHub Pages
+  id-token: write      # required for authentication with GitHub Pages
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'  # or your preferred version
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt || true
+
+      # 4. Run Python script to generate PLAYWRIGHT_METHODS.html
+      - name: Generate page methods HTML
+        run: |
+          python scripts/extract_playwright_methods.py
+
+      # 5. Commit and push generated HTML to main branch
+      - name: Commit generated HTML
+        run: |
+          if [ -f PLAYWRIGHT_METHODS.html ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            # Always get the latest main branch
+            git fetch origin main
+            git checkout main
+            git pull origin main --no-rebase --strategy-option=theirs
+
+            # Add and commit generated file
+            git add PLAYWRIGHT_METHODS.html
+            git commit -m "update PLAYWRIGHT_METHODS.html" || echo "No changes to commit"
+
+            # Push changes to remote (force to ensure overwrite if needed)
+            git push origin main
+          else
+            echo "PLAYWRIGHT_METHODS.html not found — skipping commit."
+          fi
+
+
+      # 6. Prepare HTML file for GitHub Pages deployment
+      - name: Prepare HTML for Pages
+        run: |
+          mkdir -p public
+          cp PLAYWRIGHT_METHODS.html public/index.html
+
+      # 7. Upload artifact to GitHub Pages
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+  deploy:
+    # 8. Deploy the uploaded artifact to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

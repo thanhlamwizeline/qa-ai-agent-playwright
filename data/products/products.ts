@@ -1,6 +1,6 @@
 import type {Product} from "../data-interfaces"
 
-export const products:Product[] = [
+export const PRODUCTS:Product[] = [
     {
         "productName": "Iphone 6 32gb",
         "productPrice": 790,
