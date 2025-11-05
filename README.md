@@ -63,38 +63,68 @@ This project encompasses various scenarios and practices, including:
 
 ## Project Structure
  ```shell
-.github/workflows/
- └── e2e_default_test.yml         # CI/CD workflow for E2E tests
+qa-ai-agent-playwright-native-typescript-automation/
+├── .gitignore
+├── .vscode/
+│
+├── .github/
+│   └── workflows/
+│       ├── e2e_default_test.yml
+│       └── extract_page_methods.yml
+│
+├── data/
+│   ├── cartPage/
+│   ├── config/
+│   ├── homepage/
+│   ├── login/
+│   ├── products/
+│   ├── constants.ts
+│   └── data-interfaces.ts
+│
+├── helpers/
+│   ├── CommonActionsHelpers.ts
+│   ├── TestHelpers.ts
+│   └── TestSetUpHelpers.ts
+│
+├── node_modules/
+│
+├── page-objects/
+│   ├── components/
+│   │   └── NavigationComponent.ts
+│   ├── BasePage.ts
+│   ├── CartPage.ts
+│   ├── HomePage.ts
+│   ├── LoginPage.ts
+│   ├── POMManager.ts
+│   └── ProductDetailPage.ts
+│
+├── playwright/
+│   └── .auth/
+│
+├── playwright-report/
+│
+├── scripts/
+│   └── extract_playwright_methods.py
+│
+├── test-results/
+│   ├── .last-run.json
+│   └── test-results-2025-11-04T12-58-32-722Z/
+│
+├── tests/
+│   ├── feature_cart/
+│   ├── feature_homepage/
+│   ├── feature_login/
+│   └── feature_product/
+│
+├── utils/
+│   └── utils_function.ts
+│
+├── .env
+├── CONVENTIONS.md
+├── eslint.config.mjs
+├── package.json
+├── package-lock.json
 
-data/
- ├── config/
- │    └── testconfig.ts           # Environment/test configuration
- ├── testdata/
- │    ├── products/
- │    │    └── data_e2e.json      # E2E product data
- │    └── constants.ts            # Global constants & URLs
-
-pages/
- ├── components/
- │    └── Navigation.ts           # Shared UI component
- ├── utils/
- │    ├── CartPage.ts
- │    ├── HomePage.ts
- │    ├── LoginPage.ts
- │    ├── ProductDetailPage.ts
- │    └── POManager.ts            # Centralized Page Object manager
-
-tests/
- └── e2e/
-      ├── __screenshots__/        # Visual regression baselines
-      ├── e2e_basic.spec.ts
-      ├── e2e_image.spec.ts
-      ├── e2e_product.spec.ts
-      └── auth.setup.ts
-
-.gitignore
-README.md
-CONVENTIONS.md
 ```
 ## GitHub Actions
 Make sure to create Actions Secrets for each environment variable stated above. This is used to create a .env file for the GitHub Actions executions.
@@ -115,6 +145,19 @@ Below are the sample scripts that we can run with npm run {scriptname} like `npm
 "tests:e2e-edge": "npx playwright test --project=TestOnEdge",
 "tests:e2e-allbrowsers": "npx playwright test --project=MultiBrowser",
 ```
+## ESLint
 
+Use ESLint with TypeScript rules for consistent code style, configure import sorting and duplicate import detection.
+Enforce 2-space indentation and 120 character line limits.
+
+- Run ESLint:
+    ```shell
+    npm run lint
+    ```
+
+- Fix ESLint:
+    ```shell
+    npm run lint:fix
+    ```
 ## Page Methods Reference
 *  https://wizeline.github.io/qa-ai-agent-playwright-native-typescript-automation/
