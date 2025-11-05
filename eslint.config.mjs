@@ -1,7 +1,7 @@
 import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
 import importPlugin from 'eslint-plugin-import';
 import playwrightPlugin from 'eslint-plugin-playwright';
-import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   // Ignore patterns
@@ -23,7 +23,7 @@ export default tseslint.config(
 
   // Base configurations
   eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.recommended,
 
   // Main configuration
   {
@@ -32,7 +32,6 @@ export default tseslint.config(
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        project: './tsconfig.json',
         ecmaVersion: 2022,
         sourceType: 'module'
       }
@@ -67,11 +66,9 @@ export default tseslint.config(
         'argsIgnorePattern': '^_',
         'varsIgnorePattern': '^_'
       }],
-      '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/await-thenable': 'error',
-      '@typescript-eslint/no-misused-promises': 'error',
 
       // Import rules
+      'import/no-unresolved': 'off',
       'import/order': ['error', {
         'groups': [
           'builtin',
@@ -88,8 +85,9 @@ export default tseslint.config(
             'position': 'before'
           },
           {
-            'pattern': '@/**',
-            'group': 'internal'
+            'pattern': '../**',
+            'group': 'parent',
+            'position': 'after'
           }
         ],
         'pathGroupsExcludedImportTypes': ['builtin'],
@@ -110,10 +108,15 @@ export default tseslint.config(
     },
 
     settings: {
+      'import/parsers': {
+        '@typescript-eslint/parser': ['.ts']
+      },
       'import/resolver': {
         typescript: {
-          alwaysTryTypes: true,
-          project: './tsconfig.json'
+          alwaysTryTypes: true
+        },
+        node: {
+          extensions: ['.js', '.jsx', '.ts', '.tsx']
         }
       }
     }

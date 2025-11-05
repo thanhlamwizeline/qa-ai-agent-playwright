@@ -1,8 +1,8 @@
-import { Page } from "@playwright/test"
+import { Page } from '@playwright/test';
 
 export class TestHelpers{
 
-    static async waitForNumberOfSeconds(page: Page, numberOfSecond: number){
-        await page.waitForTimeout(numberOfSecond * 1000)
-    }
+  static async waitForNumberOfSeconds(page: Page, numberOfSecond: number){
+    await page.waitForTimeout(numberOfSecond * 1000);
+  }
 }

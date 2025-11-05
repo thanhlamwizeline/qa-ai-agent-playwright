@@ -1,9 +1,9 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: "./tests",
+  testDir: './tests',
   snapshotPathTemplate:
-    "{testDir}/e2e/__screenshots__/{testFileName}/{arg}{ext}",
+    '{testDir}/e2e/__screenshots__/{testFileName}/{arg}{ext}',
   fullyParallel: false,
   expect: {
     timeout: process.env.CI ? 20000 : 10000
@@ -22,70 +22,70 @@ export default defineConfig({
     ['dot']
   ],
   use: {
-    trace: "retain-on-failure",
-    video: "retain-on-failure",
+    trace: 'retain-on-failure',
+    video: 'retain-on-failure',
     headless: true,
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
-      name: "setup",
-      testDir: "./helpers",
-      testMatch: "TestSetUpHelpers.ts",
+      name: 'setup',
+      testDir: './helpers',
+      testMatch: 'TestSetUpHelpers.ts',
     },
     /* Test against branded browsers. */
     {
-      name: "TestOnChrome",
+      name: 'TestOnChrome',
       use: {
-        ...devices["Desktop Chrome"],
+        ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
       },
-      dependencies: ["setup"],
+      dependencies: ['setup'],
     },
     {
-      name: "TestOnEdge",
+      name: 'TestOnEdge',
       use: {
-        ...devices["Desktop Edge"],
+        ...devices['Desktop Edge'],
         viewport: { width: 1920, height: 1080 },
-        channel: "msedge",
+        channel: 'msedge',
       },
-      dependencies: ["setup"],
+      dependencies: ['setup'],
     },
     {
-      name: "TestOnFirefox",
+      name: 'TestOnFirefox',
       use: {
-        ...devices["Desktop Firefox"],
+        ...devices['Desktop Firefox'],
         viewport: { width: 1920, height: 1080 },
       },
-      dependencies: ["setup"],
+      dependencies: ['setup'],
     },
 
     /* Test against multi browsers - Searially by browsers */
     {
-      name: "MultiBrowser_1",
+      name: 'MultiBrowser_1',
       use: {
-        ...devices["Desktop Chrome"],
+        ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
       },
-      dependencies: ["setup"],
+      dependencies: ['setup'],
     },
     {
-      name: "MultiBrowser_2",
+      name: 'MultiBrowser_2',
       use: {
-        ...devices["Desktop Edge"],
+        ...devices['Desktop Edge'],
         viewport: { width: 1920, height: 1080 },
-        channel: "msedge",
+        channel: 'msedge',
       },
-      dependencies: ["MultiBrowser_1"],
+      dependencies: ['MultiBrowser_1'],
     },
     {
-      name: "MultiBrowser",
+      name: 'MultiBrowser',
       use: {
-        ...devices["Desktop Firefox"],
+        ...devices['Desktop Firefox'],
         viewport: { width: 1920, height: 1080 },
       },
-      dependencies: ["MultiBrowser_2"],
+      dependencies: ['MultiBrowser_2'],
     },
   ],
 });
