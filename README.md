@@ -107,8 +107,7 @@ qa-ai-agent-playwright-native-typescript-automation/
 │   └── extract_playwright_methods.py
 │
 ├── test-results/
-│   ├── .last-run.json
-│   └── test-results-2025-11-04T12-58-32-722Z/
+│     
 │
 ├── tests/
 │   ├── feature_cart/
