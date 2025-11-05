@@ -84,31 +84,27 @@ This configuration allows the AI Agent to understand the specific structure and 
 ```json
 {
   "repository_structure": {
-    "description": "Default directory structure. Can be overridden in CONVENTIONS.md Section 12",
+    "description": "Defines where different file types are organized in the repository. RepoAnalyzer uses 'combined_patterns' to discover files. FileManager uses these patterns for TIER 3 (CONTEXT) classification with smart summary. Can be overridden in CONVENTIONS.md 'Project Configuration For AI Analysis' section.",
     "pages": {
-      "directory": "page-objects",
-      "description": "Page object files directory",
-      "file_patterns": ["*.ts", "**/*.ts"]
+      "description": "Page object files location. Full glob patterns with directory prefix.",
+      "combined_patterns": ["page-objects/*.ts", "page-objects/**/*.ts"]
     },
     "tests": {
-      "directory": "tests",
-      "description": "Test spec files directory",
-      "file_patterns": ["*.spec.ts", "**/*.spec.ts"]
+      "description": "Test spec files location. Full glob patterns with directory prefix.",
+      "combined_patterns": ["tests/*.spec.ts", "tests/**/*.spec.ts"]
     },
     "test_data": {
-      "directory": "data",
-      "description": "Test data files directory",
-      "file_patterns": ["*.ts", "*.json"]
+      "description": "Test data files location. Full glob patterns with directory prefix.",
+      "combined_patterns": ["data/*.ts", "data/*.json"]
     },
     "helpers": {
-      "directory": "helpers",
-      "description": "Test helper utilities",
-      "file_patterns": ["*.ts"]
+      "description": "Helper utility files location. Full glob patterns with directory prefix.",
+      "combined_patterns": ["helpers/*.ts"]
     }
   },
 
   "architectural_files": {
-    "description": "Critical architectural files that AI should analyze. System searches 'possible_paths' in priority order until found.",
+    "description": "Critical architectural files that need special handling. RepoAnalyzer searches 'possible_paths' in order until found. FileManager loads these as TIER 2 (IMPORTANT) with FULL CONTENT (not summary), even if they match repository_structure patterns. This ensures critical files like POManager are always fully loaded.",
     "files": [
       {
         "name": "POManager",
@@ -185,39 +181,79 @@ This configuration allows the AI Agent to understand the specific structure and 
   },
 
   "syntax_patterns": {
-    "description": "Language and framework-specific syntax patterns for AI code generation and analysis",
-    "class_declaration": "export class {ClassName}",
-    "constructor": "constructor(page: Page)",
-    "private_property": "private readonly {propertyName}: {Type}",
-    "method_declaration": "async {methodName}({params}): Promise<{ReturnType}>",
-    "import_statement": "import { {symbols} } from '{path}'",
-    "import_playwright": "import { test, expect, Page, Locator } from '@playwright/test'",
-    "import_page_object": "import { {PageClass} } from '{relativePath}'",
-    "test_describe": "test.describe('{description}', () => { })",
-    "test_case": "test('{description}', async ({ page }) => { })",
-    "test_beforeEach": "test.beforeEach(async ({ page }) => { })",
-    "test_use": "test.use({ storageState: 'path/to/state.json' })",
-    "locator_patterns": [
-      "page.locator('{selector}')",
-      "page.getByRole('{role}', { name: '{name}' })",
-      "page.getByText('{text}')",
-      "page.getByTestId('{testId}')",
-      "this.page.locator('{selector}')",
-      ".filter({ hasText: '{text}' })",
-      ".filter({ has: this.page.locator('{selector}') })"
-    ],
-    "assertion_patterns": [
-      "await expect({locator}).toBeVisible()",
-      "await expect({locator}).toHaveText('{text}')",
-      "await expect({locator}).toContainText('{text}')",
-      "await expect.poll(() => {expression}, { timeout: {ms} }).toContain('{text}')"
-    ],
-    "action_patterns": [
-      "await {locator}.click()",
-      "await {locator}.fill('{value}')",
-      "await this.page.goto('{url}')",
-      "await this.page.waitForLoadState('networkidle')"
-    ]
+    "description": "Language and framework-specific syntax patterns. Each pattern has 'template' (for code generation) and 'regex' (for parsing/analysis).",
+    "class_declaration": {
+      "template": "export class {ClassName}",
+      "regex": "export\\s+class\\s+(\\w+)"
+    },
+    "constructor": {
+      "template": "constructor(page: Page)",
+      "regex": "constructor\\s*\\(\\s*page\\s*:\\s*Page\\s*\\)"
+    },
+    "import_statement": {
+      "template": "import { {symbols} } from '{path}'",
+      "regex": "^import\\s+.+$"
+    },
+    "locator_property": {
+      "template": "readonly {propertyName}: Locator",
+      "regex": "(?:private\\s+)?(?:readonly\\s+)?(\\w+)\\s*:\\s*Locator"
+    },
+    "method_async": {
+      "template": "async {methodName}({params}): Promise<{ReturnType}>",
+      "regex": "(?:async\\s+)?(\\w+)\\s*\\(([^)]*)\\)\\s*:\\s*Promise<([^>]+)>"
+    },
+    "method_regular": {
+      "template": "{methodName}({params}): {ReturnType}",
+      "regex": "(?<!async\\s)(\\w+)\\s*\\(([^)]*)\\)\\s*:\\s*(\\w+)\\s*\\{"
+    },
+    "locator_init_locator": {
+      "template": "this.{name} = page.locator('{selector}')",
+      "regex": "this\\.(\\w+)\\s*=\\s*(?:this\\.)?page\\.locator\\s*\\(([^)]+)\\)"
+    },
+    "locator_init_getByRole": {
+      "template": "this.{name} = page.getByRole('{role}', { name: '{name}' })",
+      "regex": "this\\.(\\w+)\\s*=\\s*(?:this\\.)?page\\.getByRole\\s*\\(([^)]+)\\)"
+    },
+    "locator_init_getByText": {
+      "template": "this.{name} = page.getByText('{text}')",
+      "regex": "this\\.(\\w+)\\s*=\\s*(?:this\\.)?page\\.getByText\\s*\\(([^)]+)\\)"
+    },
+    "locator_init_getByTestId": {
+      "template": "this.{name} = page.getByTestId('{testId}')",
+      "regex": "this\\.(\\w+)\\s*=\\s*(?:this\\.)?page\\.getByTestId\\s*\\(([^)]+)\\)"
+    },
+    "locator_init_getByLabel": {
+      "template": "this.{name} = page.getByLabel('{label}')",
+      "regex": "this\\.(\\w+)\\s*=\\s*(?:this\\.)?page\\.getByLabel\\s*\\(([^)]+)\\)"
+    },
+    "locator_init_getByPlaceholder": {
+      "template": "this.{name} = page.getByPlaceholder('{placeholder}')",
+      "regex": "this\\.(\\w+)\\s*=\\s*(?:this\\.)?page\\.getByPlaceholder\\s*\\(([^)]+)\\)"
+    },
+    "test_patterns": {
+      "test_describe": {
+        "template": "test.describe('{description}', () => { })",
+        "regex": "test\\.describe\\s*\\(\\s*['\"]([^'\"]+)['\"]"
+      },
+      "test_case": {
+        "template": "test('{description}', async ({ page }) => { })",
+        "regex": "test\\s*\\(\\s*['\"]([^'\"]+)['\"]"
+      },
+      "test_beforeEach": {
+        "template": "test.beforeEach(async ({ page }) => { })",
+        "regex": "test\\.beforeEach\\s*\\("
+      }
+    },
+    "assertion_patterns": {
+      "toBeVisible": "await expect({locator}).toBeVisible()",
+      "toHaveText": "await expect({locator}).toHaveText('{text}')",
+      "toContainText": "await expect({locator}).toContainText('{text}')"
+    },
+    "action_patterns": {
+      "click": "await {locator}.click()",
+      "fill": "await {locator}.fill('{value}')",
+      "goto": "await this.page.goto('{url}')"
+    }
   },
 
   "code_style_conventions": {
@@ -244,28 +280,6 @@ This configuration allows the AI Agent to understand the specific structure and 
       "use_fixtures": true,
       "tags_format": "@tag-name in describe string"
     }
-  },
-
-  "search_priorities": {
-    "description": "File discovery order for AI analysis. Higher in list = higher priority.",
-    "page_objects": [
-      "page-objects/*.ts",
-      "page-objects/**/*.ts"
-    ],
-    "test_files": [
-      "tests/**/*.spec.ts",
-      "tests/*.spec.ts"
-    ],
-    "helpers": [
-      "helpers/*.ts"
-    ],
-    "architectural": [
-      "page-objects/POManager.ts",
-      "page-objects/components/NavigationComponent.ts",
-      "helpers/CommonActionsHelpers.ts",
-      "helpers/TestHelpers.ts",
-      "helpers/TestSetupHelpers.ts"
-    ]
   },
 
   "code_generation": {
@@ -305,22 +319,26 @@ This configuration allows the AI Agent to understand the specific structure and 
 
   "test_runner": {
     "description": "Test execution configuration for running tests",
+    "install_command": "npm install",
     "command_template": "npx playwright test {filter} {options}",
     "filter_strategies": {
       "by_file": "{test_file_path}",
       "by_tag": "--grep @{tag}",
-      "by_name": "--grep {test_name}",
+      "by_name": "--grep \"{test_name}\"",
       "by_project": "--project={project_name}"
     },
-    "output_format": "json",
-    "json_reporter": "--reporter=json",
-    "default_timeout": 60000,
-    "default_retries": 2,
-    "additional_options": [
-      "--workers=4",
-      "--reporter=html",
-      "--trace=on-first-retry"
-    ]
+    "output_format": "plain_text",
+    "report_locations": {
+      "html_report": "playwright-report/index.html",
+      "junit_report": "test-results/test-results-*.xml",
+      "test_results_dir": "test-results/"
+    },
+    "examples": {
+      "install": "npm install",
+      "run_by_tag": "npx playwright test --grep @smoke",
+      "run_by_tag_and_project": "npx playwright test --grep @smoke --project=TestOnChrome --headed",
+      "run_by_file": "npx playwright test tests/login/login.spec.ts"
+    }
   }
 ```
 
@@ -334,7 +352,6 @@ This configuration allows the AI Agent to understand the specific structure and 
   - `architectural_files` - Critical files AI should analyze
   - `file_naming_patterns` - Naming conventions for generated files
   - `code_style_conventions` - Code style (indentation, quotes, etc.)
-  - `search_priorities` - File discovery order
   - `syntax_patterns` - Language-specific syntax (if needed)
 
 **Merge Priority:**
