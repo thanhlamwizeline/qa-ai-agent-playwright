@@ -3,6 +3,9 @@ name: Extract Page Methods and Deploy to Github page
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches:
+      - main          # Runs on PRs targeting main
   workflow_dispatch:  # allows manual run from GitHub UI
 
 permissions:
