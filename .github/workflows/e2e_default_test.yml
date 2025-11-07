@@ -1,7 +1,12 @@
 name: Playwright E2E Tests
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main          #Runs on push/merge to main
+  pull_request:
+    branches:
+      - main          #Runs on PRs targeting main
 
 jobs:
   playwright:
