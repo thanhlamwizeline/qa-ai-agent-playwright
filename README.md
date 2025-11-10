@@ -108,7 +108,7 @@ qa-ai-agent-playwright-native-typescript-automation/
 │   └── extract_playwright_methods.py # Python script to extract or map Playwright page methods
 │
 ├── test-results/                    # Raw Playwright test results, traces, and logs
-│  
+│
 ├── tests/                           # Test execution layer — organized by feature
 │   ├── feature_cart/                # Tests related to cart functionality
 │   ├── feature_homepage/            # Tests for homepage scenarios
@@ -159,5 +159,5 @@ Enforce 2-space indentation and 120 character line limits.
     ```shell
     npm run lint:fix
     ```
-## Page Methods Reference
+## Data and Page Methods Reference
 *  https://wizeline.github.io/qa-ai-agent-playwright-native-typescript-automation/
