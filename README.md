@@ -159,5 +159,5 @@ Enforce 2-space indentation and 120 character line limits.
     ```shell
     npm run lint:fix
     ```
-## Data and Data and Data and Page Methods Reference
+## Data and Page Methods Reference
 *  https://wizeline.github.io/qa-ai-agent-playwright-native-typescript-automation/
