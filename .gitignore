@@ -40,3 +40,10 @@ playwright/.auth/
 # Local files
 local_*
 trace*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
