@@ -1,75 +1,87 @@
-name: Extract Methods and Deploy to GitHub Pages
+name: Extract Page Methods and Deploy to Github page
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch:  # allows manual run from GitHub UI
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: write      # needed to push generated HTML back to repo
+  pages: write         # needed to deploy to GitHub Pages
+  id-token: write      # required for authentication with GitHub Pages
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main branch
+      # 1. Checkout the repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
+      # 2. Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.11'  # or your preferred version
 
+      # 3. Install dependencies
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt 2>/dev/null || echo "requirements.txt not found"
+          pip install -r requirements.txt || true
 
-      - name: Generate HTML file
-        run: python scripts/extract_data_and_method_reference.py
-        continue-on-error: true
-
-      - name: Configure Git
+      # 4. Run Python script to generate DATA_METHODS_REFERENCE.html
+      - name: Generate page methods HTML
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          python scripts/extract_data_and_method_reference.py
 
-      - name: Push to target branch
-        if: hashFiles('DATA_METHODS_REFERENCE.html') != ''
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # 5. Push ONLY the generated HTML file to DATA_METHODS_REFERENCE_FOR_AI branch
+      - name: Push to DATA_METHODS_REFERENCE_FOR_AI branch
         run: |
-          # Create and checkout orphan branch
-          git checkout --orphan DATA_METHODS_REFERENCE_FOR_AI
-          git rm -rf .
-
-          # Copy file
-          cp "${{ github.workspace }}/DATA_METHODS_REFERENCE.html" ./DATA_METHODS_REFERENCE.html
-
-          # Commit and push
-          git add DATA_METHODS_REFERENCE.html
-          git commit -m "Auto-generated: DATA_METHODS_REFERENCE.html"
-          git push --set-upstream origin DATA_METHODS_REFERENCE_FOR_AI --force
-
-      - name: Prepare GitHub Pages
-        run: |
-          mkdir -p public
           if [ -f DATA_METHODS_REFERENCE.html ]; then
-            cp DATA_METHODS_REFERENCE.html public/index.html
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            echo "File found. Proceeding with git plumbing to push single file."
+
+            # 1. Create a "blob" object from our file and get its hash
+            # This stages the file's content in git's database
+            FILE_HASH=$(git hash-object -w DATA_METHODS_REFERENCE.html)
+            echo "File Hash: $FILE_HASH"
+
+            # 2. Create a "tree" object (a directory) containing only this file
+            # The format is <mode> <type> <hash>\t<filename>
+            # 100644 means it's a regular, non-executable file
+            TREE_HASH=$(echo "100644 blob $FILE_HASH"$'\t'"DATA_METHODS_REFERENCE.html" | git mktree)
+            echo "Tree Hash: $TREE_HASH"
+
+            # 3. Create a "commit" object pointing to this tree
+            # This commit has no parent, making it a new root commit
+            COMMIT_HASH=$(git commit-tree "$TREE_HASH" -m "Update DATA_METHODS_REFERENCE.html")
+            echo "Commit Hash: $COMMIT_HASH"
+
+            # 4. Force-push this new commit to the target branch
+            # This overwrites the branch history to be just this single commit
+            git push origin "$COMMIT_HASH":refs/heads/DATA_METHODS_REFERENCE_FOR_AI --force
+            echo "Successfully pushed single file to DATA_METHODS_REFERENCE_FOR_AI branch."
+          else
+            echo "DATA_METHODS_REFERENCE.html not found — skipping commit."
           fi
 
-      - name: Upload Pages artifact
+      # 6. Prepare HTML file for GitHub Pages deployment
+      - name: Prepare HTML for Pages
+        run: |
+          mkdir -p public
+          cp DATA_METHODS_REFERENCE.html public/index.html
+
+      # 7. Upload artifact to GitHub Pages
+      - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: public
+          path: ./public
 
   deploy:
+    # 8. Deploy the uploaded artifact to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
     environment:
