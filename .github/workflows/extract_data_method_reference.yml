@@ -35,28 +35,26 @@ jobs:
         run: |
           python scripts/extract_data_and_method_reference.py
 
-      # 5. Commit and push generated HTML to main branch
-      - name: Commit generated HTML
+      # 5. Push generated HTML to DATA_METHODS_REFERENCE_FOR_AI branch
+      - name: Push to DATA_METHODS_REFERENCE_FOR_AI branch
         run: |
           if [ -f DATA_METHODS_REFERENCE.html ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            # Always get the latest main branch
-            git fetch origin main
-            git checkout main
-            git pull origin main --no-rebase --strategy-option=theirs
+            # Create or checkout the target branch
+            git fetch origin DATA_METHODS_REFERENCE_FOR_AI || true
+            git checkout -B DATA_METHODS_REFERENCE_FOR_AI origin/DATA_METHODS_REFERENCE_FOR_AI || git checkout -B DATA_METHODS_REFERENCE_FOR_AI
 
             # Add and commit generated file
             git add DATA_METHODS_REFERENCE.html
             git commit -m "update DATA_METHODS_REFERENCE.html" || echo "No changes to commit"
 
-            # Push changes to remote (force to ensure overwrite if needed)
-            git push origin main
+            # Push changes to remote
+            git push origin DATA_METHODS_REFERENCE_FOR_AI
           else
             echo "DATA_METHODS_REFERENCE.html not found — skipping commit."
           fi
-
 
       # 6. Prepare HTML file for GitHub Pages deployment
       - name: Prepare HTML for Pages
