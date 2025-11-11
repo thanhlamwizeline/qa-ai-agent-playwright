@@ -1,4 +1,4 @@
-name: Extract Page Methods and Deploy to Github page
+name: Extract Page Methods and Deploy to GitHub Pages
 
 on:
   push:
@@ -15,70 +15,71 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository (already authenticated)
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # 2. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 3. Install dependencies
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt || true
+          pip install --upgrade pip
+          pip install -r requirements.txt || pip install pyyaml requests
 
-      # 4. Run Python script to generate HTML
       - name: Generate page methods HTML
         run: |
           python scripts/extract_data_and_method_reference.py
+        continue-on-error: true
 
-      # 5. Push only DATA_METHODS_REFERENCE.html to target branch
-      - name: Push to DATA_METHODS_REFERENCE_FOR_AI branch
+      - name: Verify generated file
+        run: |
+          if [ ! -f DATA_METHODS_REFERENCE.html ]; then
+            echo "Error: DATA_METHODS_REFERENCE.html was not generated"
+            exit 1
+          fi
+          echo "✓ HTML file generated successfully"
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update DATA_METHODS_REFERENCE_FOR_AI branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -f DATA_METHODS_REFERENCE.html ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-
-            # Use authenticated remote
-            git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}"
-
-            # Fetch the branch if it exists
-            git fetch origin DATA_METHODS_REFERENCE_FOR_AI || true
-
-            # Checkout or create the branch
-            if git rev-parse --verify DATA_METHODS_REFERENCE_FOR_AI >/dev/null 2>&1; then
-              git checkout DATA_METHODS_REFERENCE_FOR_AI
-            else
-              git checkout -b DATA_METHODS_REFERENCE_FOR_AI
-            fi
-
-            # Copy the generated file
-            cp "$GITHUB_WORKSPACE/DATA_METHODS_REFERENCE.html" ./DATA_METHODS_REFERENCE.html
-
-            # Commit and force push
-            git add DATA_METHODS_REFERENCE.html
-            git commit -m "Update DATA_METHODS_REFERENCE.html [auto]" || echo "No changes to commit"
-            git push origin DATA_METHODS_REFERENCE_FOR_AI --force
+          # Create orphan branch if it doesn't exist
+          if ! git rev-parse --verify origin/DATA_METHODS_REFERENCE_FOR_AI >/dev/null 2>&1; then
+            git checkout --orphan DATA_METHODS_REFERENCE_FOR_AI
+            git rm -rf .
           else
-            echo "DATA_METHODS_REFERENCE.html not found — skipping commit."
+            git fetch origin DATA_METHODS_REFERENCE_FOR_AI
+            git checkout DATA_METHODS_REFERENCE_FOR_AI
           fi
 
-      # 6. Prepare HTML for GitHub Pages
-      - name: Prepare HTML for Pages
+          # Copy the generated file
+          cp "$GITHUB_WORKSPACE/DATA_METHODS_REFERENCE.html" ./DATA_METHODS_REFERENCE.html
+
+          # Commit and push
+          git add DATA_METHODS_REFERENCE.html
+          git commit -m "Update DATA_METHODS_REFERENCE.html [auto-generated]" || echo "No changes to commit"
+          git push origin DATA_METHODS_REFERENCE_FOR_AI --force
+
+      - name: Prepare files for GitHub Pages
         run: |
           mkdir -p public
           cp DATA_METHODS_REFERENCE.html public/index.html
+          echo "✓ Files prepared for deployment"
 
-      # 7. Upload artifact for GitHub Pages
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
+          retention-days: 30
 
   deploy:
     needs: build
