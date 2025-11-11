@@ -60,7 +60,11 @@ jobs:
             COMMIT_HASH=$(git commit-tree "$TREE_HASH" -m "Update DATA_METHODS_REFERENCE.html")
             echo "Commit Hash: $COMMIT_HASH"
 
-            # 4. Force-push this new commit to the target branch
+            # 4. Set the remote URL with authentication
+            # This ensures the push command has the necessary credentials
+            git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+
+            # 5. Force-push this new commit to the target branch
             # This overwrites the branch history to be just this single commit
             git push origin "$COMMIT_HASH":refs/heads/DATA_METHODS_REFERENCE_FOR_AI --force
             echo "Successfully pushed single file to DATA_METHODS_REFERENCE_FOR_AI branch."
