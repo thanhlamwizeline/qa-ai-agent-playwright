@@ -39,34 +39,34 @@ jobs:
       - name: Push to DATA_METHODS_REFERENCE_FOR_AI branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
         run: |
           if [ -f DATA_METHODS_REFERENCE.html ]; then
-            git config --global user.name "github-actions[bot]"
-            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            # Authenticated repo URL using GITHUB_TOKEN
-            AUTH_REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO}.git"
+            # Ensure remote uses authenticated URL
+            git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}"
 
-            echo "✅ Cloning branch DATA_METHODS_REFERENCE_FOR_AI..."
-            TEMP_DIR=$(mktemp -d)
+            # Fetch the target branch (create if missing)
+            git fetch origin DATA_METHODS_REFERENCE_FOR_AI || true
 
-            # Clone the branch (or create it if missing)
-            git clone --depth 1 --branch DATA_METHODS_REFERENCE_FOR_AI "$AUTH_REPO_URL" "$TEMP_DIR" 2>/dev/null \
-              || (git clone --depth 1 "$AUTH_REPO_URL" "$TEMP_DIR" && cd "$TEMP_DIR" && git checkout -b DATA_METHODS_REFERENCE_FOR_AI)
+            # Create a worktree for the target branch
+            mkdir -p ../branch_worktree
+            git worktree add ../branch_worktree DATA_METHODS_REFERENCE_FOR_AI || (
+              git branch DATA_METHODS_REFERENCE_FOR_AI || true
+              git worktree add ../branch_worktree DATA_METHODS_REFERENCE_FOR_AI
+            )
 
-            echo "✅ Copying generated file..."
-            cp DATA_METHODS_REFERENCE.html "$TEMP_DIR/DATA_METHODS_REFERENCE.html"
+            # Copy only the updated HTML
+            cp DATA_METHODS_REFERENCE.html ../branch_worktree/DATA_METHODS_REFERENCE.html
 
-            cd "$TEMP_DIR"
+            cd ../branch_worktree
             git add DATA_METHODS_REFERENCE.html
             git commit -m "Update DATA_METHODS_REFERENCE.html [auto]" || echo "No changes to commit"
-
-            echo "🚀 Force pushing to DATA_METHODS_REFERENCE_FOR_AI..."
-            git push "$AUTH_REPO_URL" DATA_METHODS_REFERENCE_FOR_AI --force
+            git push origin DATA_METHODS_REFERENCE_FOR_AI --force
           else
             echo "⚠️ DATA_METHODS_REFERENCE.html not found — skipping commit."
-          fi
+    fi
 
       # 6. Prepare HTML file for GitHub Pages deployment
       - name: Prepare HTML for Pages
