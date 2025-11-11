@@ -44,27 +44,28 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            # Ensure remote uses authenticated URL
+            # Use the existing checkout and ensure remote is authenticated
             git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}"
 
-            # Fetch target branch if it exists
+            # Fetch target branch
             git fetch origin DATA_METHODS_REFERENCE_FOR_AI || true
 
-            # Checkout target branch (create if it doesn't exist)
-            if git show-ref --verify --quiet refs/heads/DATA_METHODS_REFERENCE_FOR_AI; then
+            # Checkout target branch (or create if missing)
+            if git rev-parse --verify DATA_METHODS_REFERENCE_FOR_AI >/dev/null 2>&1; then
               git checkout DATA_METHODS_REFERENCE_FOR_AI
             else
               git checkout -b DATA_METHODS_REFERENCE_FOR_AI
             fi
 
-            # Copy updated file from main workspace
+            # Copy updated file
             cp "$GITHUB_WORKSPACE/DATA_METHODS_REFERENCE.html" ./DATA_METHODS_REFERENCE.html
 
+            # Commit and force push
             git add DATA_METHODS_REFERENCE.html
             git commit -m "Update DATA_METHODS_REFERENCE.html [auto]" || echo "No changes to commit"
             git push origin DATA_METHODS_REFERENCE_FOR_AI --force
           else
-            echo "⚠️ DATA_METHODS_REFERENCE.html not found — skipping commit."
+            echo "DATA_METHODS_REFERENCE.html not found — skipping commit."
           fi
 
       # 6. Prepare HTML file for GitHub Pages deployment
