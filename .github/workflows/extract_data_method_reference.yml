@@ -42,8 +42,11 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            # Push only the DATA_METHODS_REFERENCE.html file to the target branch
-            git push origin HEAD:DATA_METHODS_REFERENCE_FOR_AI --force-with-lease
+            # Fetch latest info from remote
+            git fetch origin
+
+            # Push only the DATA_METHODS_REFERENCE.html file to the target branch with force
+            git push origin HEAD:DATA_METHODS_REFERENCE_FOR_AI --force
           else
             echo "DATA_METHODS_REFERENCE.html not found — skipping commit."
           fi
