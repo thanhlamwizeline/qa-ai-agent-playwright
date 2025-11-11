@@ -39,31 +39,33 @@ jobs:
       - name: Push to DATA_METHODS_REFERENCE_FOR_AI branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
           if [ -f DATA_METHODS_REFERENCE.html ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-            # Define authenticated repo URL
-            REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+            # Authenticated repo URL using GITHUB_TOKEN
+            AUTH_REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO}.git"
 
-            # Fetch the target branch or create it if missing
-            git fetch origin DATA_METHODS_REFERENCE_FOR_AI || true
-
-            # Create a temporary directory and clone only that branch
+            echo "✅ Cloning branch DATA_METHODS_REFERENCE_FOR_AI..."
             TEMP_DIR=$(mktemp -d)
-            git clone --depth 1 --branch DATA_METHODS_REFERENCE_FOR_AI --single-branch "$REPO_URL" "$TEMP_DIR" || \
-              git clone --depth 1 "$REPO_URL" "$TEMP_DIR" && cd "$TEMP_DIR" && git checkout -b DATA_METHODS_REFERENCE_FOR_AI
 
-            # Copy updated file
-            cp "$GITHUB_WORKSPACE/DATA_METHODS_REFERENCE.html" "$TEMP_DIR/DATA_METHODS_REFERENCE.html"
+            # Clone the branch (or create it if missing)
+            git clone --depth 1 --branch DATA_METHODS_REFERENCE_FOR_AI "$AUTH_REPO_URL" "$TEMP_DIR" 2>/dev/null \
+              || (git clone --depth 1 "$AUTH_REPO_URL" "$TEMP_DIR" && cd "$TEMP_DIR" && git checkout -b DATA_METHODS_REFERENCE_FOR_AI)
+
+            echo "✅ Copying generated file..."
+            cp DATA_METHODS_REFERENCE.html "$TEMP_DIR/DATA_METHODS_REFERENCE.html"
 
             cd "$TEMP_DIR"
             git add DATA_METHODS_REFERENCE.html
             git commit -m "Update DATA_METHODS_REFERENCE.html [auto]" || echo "No changes to commit"
-            git push "$REPO_URL" DATA_METHODS_REFERENCE_FOR_AI --force
+
+            echo "🚀 Force pushing to DATA_METHODS_REFERENCE_FOR_AI..."
+            git push "$AUTH_REPO_URL" DATA_METHODS_REFERENCE_FOR_AI --force
           else
-            echo "DATA_METHODS_REFERENCE.html not found — skipping commit."
+            echo "⚠️ DATA_METHODS_REFERENCE.html not found — skipping commit."
           fi
 
       # 6. Prepare HTML file for GitHub Pages deployment
