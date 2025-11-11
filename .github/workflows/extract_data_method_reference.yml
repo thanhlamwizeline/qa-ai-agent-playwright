@@ -3,39 +3,39 @@ name: Extract Page Methods and Deploy to Github page
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # allows manual run from GitHub UI
+  workflow_dispatch:
 
 permissions:
-  contents: write      # needed to push generated HTML back to repo
-  pages: write         # needed to deploy to GitHub Pages
-  id-token: write      # required for authentication with GitHub Pages
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repository
+      # 1. Checkout repository (already authenticated)
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Set up Python environment
+      # 2. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 3. Install dependencies (optional)
+      # 3. Install dependencies
       - name: Install dependencies
         run: |
           pip install -r requirements.txt || true
 
-      # 4. Run Python script to generate DATA_METHODS_REFERENCE.html
+      # 4. Run Python script to generate HTML
       - name: Generate page methods HTML
         run: |
           python scripts/extract_data_and_method_reference.py
 
-      # 5. Push generated HTML to DATA_METHODS_REFERENCE_FOR_AI branch
+      # 5. Push only DATA_METHODS_REFERENCE.html to target branch
       - name: Push to DATA_METHODS_REFERENCE_FOR_AI branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,20 +44,20 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            # Use the existing checkout and ensure remote is authenticated
+            # Use authenticated remote
             git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}"
 
-            # Fetch target branch
+            # Fetch the branch if it exists
             git fetch origin DATA_METHODS_REFERENCE_FOR_AI || true
 
-            # Checkout target branch (or create if missing)
+            # Checkout or create the branch
             if git rev-parse --verify DATA_METHODS_REFERENCE_FOR_AI >/dev/null 2>&1; then
               git checkout DATA_METHODS_REFERENCE_FOR_AI
             else
               git checkout -b DATA_METHODS_REFERENCE_FOR_AI
             fi
 
-            # Copy updated file
+            # Copy the generated file
             cp "$GITHUB_WORKSPACE/DATA_METHODS_REFERENCE.html" ./DATA_METHODS_REFERENCE.html
 
             # Commit and force push
@@ -68,20 +68,19 @@ jobs:
             echo "DATA_METHODS_REFERENCE.html not found — skipping commit."
           fi
 
-      # 6. Prepare HTML file for GitHub Pages deployment
+      # 6. Prepare HTML for GitHub Pages
       - name: Prepare HTML for Pages
         run: |
           mkdir -p public
           cp DATA_METHODS_REFERENCE.html public/index.html
 
-      # 7. Upload artifact to GitHub Pages
+      # 7. Upload artifact for GitHub Pages
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
 
   deploy:
-    # 8. Deploy the uploaded artifact to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
     environment:
