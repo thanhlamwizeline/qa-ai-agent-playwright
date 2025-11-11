@@ -6,16 +6,16 @@ on:
   workflow_dispatch:  # allows manual run from GitHub UI
 
 permissions:
-  contents: write      # needed to push generated HTML back to repo
-  pages: write         # needed to deploy to GitHub Pages
-  id-token: write      # required for authentication with GitHub Pages
+  contents: write      # Needed to push code back to the repo
+  pages: write         # Needed to deploy GitHub Pages
+  id-token: write      # Needed for authentication with GitHub Pages
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repository
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -23,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'  # or your preferred version
+          python-version: '3.11'
 
       # 3. Install dependencies
       - name: Install dependencies
@@ -35,29 +35,50 @@ jobs:
         run: |
           python scripts/extract_data_and_method_reference.py
 
-      # 5. Push generated HTML to DATA_METHODS_REFERENCE_FOR_AI branch
-      - name: Push to DATA_METHODS_REFERENCE_FOR_AI branch
-        run: |
-          if [ -f DATA_METHODS_REFERENCE.html ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-
-            # Fetch latest info from remote
-            git fetch origin
-
-            # Push only the DATA_METHODS_REFERENCE.html file to the target branch with force
-            git push origin HEAD:DATA_METHODS_REFERENCE_FOR_AI --force
-          else
-            echo "DATA_METHODS_REFERENCE.html not found — skipping commit."
-          fi
-
-      # 6. Prepare HTML file for GitHub Pages deployment
+      # 5. Prepare HTML file for GitHub Pages deployment
+      # We copy the HTML file to 'public' BEFORE git push messes up the directory
       - name: Prepare HTML for Pages
         run: |
           mkdir -p public
-          cp DATA_METHODS_REFERENCE.html public/index.html
+          if [ -f DATA_METHODS_REFERENCE.html ]; then
+            cp DATA_METHODS_REFERENCE.html public/index.html
+          else
+            echo "DATA_METHODS_REFERENCE.html not found! Skipping Pages prep."
+            exit 1 # Or handle the error as you wish
+          fi
+
+      # 6. Push ONLY the generated HTML file to the DATA_METHODS_REFERENCE_FOR_AI branch
+      - name: Push to DATA_METHODS_REFERENCE_FOR_AI branch
+        run: |
+          if [ -f DATA_METHODS_REFERENCE.html ]; then
+            # Configure git user
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            # FIX AUTHENTICATION ERROR: Add token to the 'origin' URL
+            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
+            # Create a new (orphan) branch with no history
+            git checkout --orphan temp-branch
+
+            # Clear the index (un-stage all files) from the old branch
+            git rm -rf --cached .
+
+            # Add only the HTML file (use -f to force add if the file is in .gitignore)
+            git add -f DATA_METHODS_REFERENCE.html
+
+            # Commit this file
+            git commit -m "Update generated DATA_METHODS_REFERENCE.html"
+
+            # Force-push this temp branch over the DATA_METHODS_REFERENCE_FOR_AI branch
+            # Your branch will always be clean, with only 1 commit
+            git push origin temp-branch:DATA_METHODS_REFERENCE_FOR_AI --force
+          else
+            echo "DATA_METHODS_REFERENCE.html not found — skipping push."
+          fi
 
       # 7. Upload artifact to GitHub Pages
+      # This step uploads the './public' directory created in Step 5
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
