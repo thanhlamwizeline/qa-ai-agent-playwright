@@ -83,6 +83,8 @@ This configuration allows the AI Agent to understand the specific structure and 
 
 ```json
 {
+  "framework_id": "playwright_native_pom_typescript",
+
   "repository_structure": {
     "description": "Defines where different file types are organized in the repository. RepoAnalyzer uses 'combined_patterns' to discover files. FileManager uses these patterns for TIER 3 (CONTEXT) classification with smart summary. Can be overridden in CONVENTIONS.md 'Project Configuration For AI Analysis' section.",
     "pages": {
@@ -150,14 +152,14 @@ This configuration allows the AI Agent to understand the specific structure and 
   },
 
   "file_extensions": {
-    "description": "Supported file extensions for this framework",
+    "description": "File extension mappings used by RepoAnalyzer to determine default file extensions and by CodeGenerator to identify and validate test files vs other file types",
     "typescript": [".ts"],
     "test_files": [".spec.ts", ".test.ts"],
     "data": [".json", ".ts"]
   },
 
   "file_naming_patterns": {
-    "description": "File naming conventions for AI to find and generate files",
+    "description": "File naming conventions with example filenames that AI uses to find similar files in the repository and read their actual code to learn the coding patterns. The 'examples' arrays are critical - prompt builder searches for these exact filenames in the repo to extract real code examples for AI learning",
     "page_objects": {
       "suffix": "Page",
       "pattern": "*Page.ts",
@@ -181,7 +183,7 @@ This configuration allows the AI Agent to understand the specific structure and 
   },
 
   "syntax_patterns": {
-    "description": "Language and framework-specific syntax patterns. Each pattern has 'template' (for code generation) and 'regex' (for parsing/analysis).",
+    "description": "Language and framework-specific syntax patterns for parsing existing code and generating new code. Each pattern has 'template' (string template for AI code generation) and 'regex' (regular expression for parsing existing repository code). Used by RepoAnalyzer to parse methods/locators/imports from existing code, and by prompt builder to teach AI the correct syntax for this framework",
     "class_declaration": {
       "template": "export class {ClassName}",
       "regex": "export\\s+class\\s+(\\w+)"
@@ -200,11 +202,11 @@ This configuration allows the AI Agent to understand the specific structure and 
     },
     "method_async": {
       "template": "async {methodName}({params}): Promise<{ReturnType}>",
-      "regex": "(?:async\\s+)?(\\w+)\\s*\\(([^)]*)\\)\\s*:\\s*Promise<([^>]+)>"
+      "regex": "async\\s+(\\w+)\\s*\\(([^)]*)\\)(?:\\s*:\\s*Promise<([^>]+)>)?\\s*\\{"
     },
     "method_regular": {
       "template": "{methodName}({params}): {ReturnType}",
-      "regex": "(?<!async\\s)(\\w+)\\s*\\(([^)]*)\\)\\s*:\\s*(\\w+)\\s*\\{"
+      "regex": "(?<!async\\s)(\\w+)\\s*\\(([^)]*)\\)(?:\\s*:\\s*([^{]+?))?\\s*\\{"
     },
     "locator_init_locator": {
       "template": "this.{name} = page.locator('{selector}')",
@@ -256,90 +258,32 @@ This configuration allows the AI Agent to understand the specific structure and 
     }
   },
 
-  "code_style_conventions": {
-    "description": "Code style conventions for AI code generation",
-    "indentation": 2,
-    "line_length": 120,
-    "quote_style": "single",
-    "semicolons": true,
-    "naming": {
-      "classes": "PascalCase",
-      "functions": "camelCase",
-      "variables": "camelCase",
-      "constants": "UPPER_SNAKE_CASE",
-      "private_properties": "camelCase"
-    },
-    "access_modifiers": {
-      "page_properties": "private readonly",
-      "locators": "private readonly",
-      "methods": "async (public by default)"
-    },
-    "test_structure": {
-      "use_describe_blocks": true,
-      "use_test_use_for_setup": true,
-      "use_fixtures": true,
-      "tags_format": "@tag-name in describe string"
-    }
-  },
-
-  "code_generation": {
-    "description": "Settings for AI code generation",
-    "generated_file_patterns": {
-      "test_files": "tests/**/*.spec.ts",
-      "page_objects": "page-objects/**/*Page.ts",
-      "helpers": "helpers/**/*.ts"
-    },
-    "naming": {
-      "test_suffix": ".spec.ts",
-      "page_suffix": "Page.ts",
-      "component_suffix": "Component.ts"
-    },
-    "structure": {
-      "test_organization": "describe/test",
-      "imports_style": "typescript",
-      "use_async_await": true
-    },
-    "test_file_naming": {
-      "pattern": "{feature-name}_{validation-type}.spec.ts",
-      "case": "snake_case"
-    },
-    "imports": {
-      "test_framework": "import { test, expect } from '@playwright/test';",
-      "use_path_mapping": false
-    },
-    "test_structure": {
-      "use_describe_blocks": true,
-      "use_test_fixtures": true,
-      "use_test_use_for_setup": true,
-      "use_beforeEach": true,
-      "async_await": true,
-      "tags_in_describe": true
-    }
-  },
 
   "test_runner": {
-    "description": "Test execution configuration for running tests",
+    "description": "Test execution configuration. Used by test_runner.py to build install and test commands. Test result parsing is handled by parse_test_results() method in code",
     "install_command": "npm install",
-    "command_template": "npx playwright test {filter} {options}",
+    "command_template": "npx playwright test {filter} {options} --workers=1",
     "filter_strategies": {
       "by_file": "{test_file_path}",
       "by_tag": "--grep @{tag}",
       "by_name": "--grep \"{test_name}\"",
       "by_project": "--project={project_name}"
-    },
-    "output_format": "plain_text",
-    "report_locations": {
-      "html_report": "playwright-report/index.html",
-      "junit_report": "test-results/test-results-*.xml",
-      "test_results_dir": "test-results/"
-    },
-    "examples": {
-      "install": "npm install",
-      "run_by_tag": "npx playwright test --grep @smoke",
-      "run_by_tag_and_project": "npx playwright test --grep @smoke --project=TestOnChrome --headed",
-      "run_by_file": "npx playwright test tests/login/login.spec.ts"
     }
+  },
+
+  "customization_guide": {
+    "description": "Guide for customizing this configuration",
+    "override_priority": "CONVENTIONS.md 'Project Configuration For AI Analysis' section > This config",
+    "notes": [
+      "All paths are relative to repository root",
+      "User can add subdirectories in CONVENTIONS.md 'Project Configuration For AI Analysis' section",
+      "User can add more architectural files in CONVENTIONS.md 'Project Configuration For AI Analysis' section",
+      "'possible_paths' are searched sequentially until file found",
+      "Supports glob patterns: *.ts, **/*.ts",
+      "FileManager Tier Classification: FILES TO UPDATE (CRITICAL - full content) > architectural_files (IMPORTANT - full content) > repository_structure patterns (CONTEXT - smart summary) > others (REFERENCE - metadata only)"
+    ]
   }
+}
 ```
 
 **Customization Guide:**
