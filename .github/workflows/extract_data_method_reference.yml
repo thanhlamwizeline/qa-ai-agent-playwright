@@ -1,4 +1,4 @@
-name: Extract Page Methods and Deploy to GitHub Pages
+name: Extract Methods and Deploy to GitHub Pages
 
 on:
   push:
@@ -15,8 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout main branch
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,52 +28,46 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt || pip install pyyaml
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt 2>/dev/null || echo "requirements.txt not found"
 
-      - name: Generate page methods HTML
+      - name: Generate HTML file
         run: python scripts/extract_data_and_method_reference.py
         continue-on-error: true
 
-      - name: Check if file exists
-        id: check_file
-        run: |
-          if [ -f DATA_METHODS_REFERENCE.html ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Setup Git credentials
-        if: steps.check_file.outputs.exists == 'true'
+      - name: Configure Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Push to DATA_METHODS_REFERENCE_FOR_AI branch
-        if: steps.check_file.outputs.exists == 'true'
+      - name: Push to target branch
+        if: hashFiles('DATA_METHODS_REFERENCE.html') != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Add file to git
+          # Create and checkout orphan branch
+          git checkout --orphan DATA_METHODS_REFERENCE_FOR_AI
+          git rm -rf .
+
+          # Copy file
+          cp "${{ github.workspace }}/DATA_METHODS_REFERENCE.html" ./DATA_METHODS_REFERENCE.html
+
+          # Commit and push
           git add DATA_METHODS_REFERENCE.html
+          git commit -m "Auto-generated: DATA_METHODS_REFERENCE.html"
+          git push --set-upstream origin DATA_METHODS_REFERENCE_FOR_AI --force
 
-          # Create commit (may be empty, that's ok)
-          git commit --allow-empty -m "Update DATA_METHODS_REFERENCE.html [auto]"
-
-          # Push to target branch using built-in git authentication
-          git push origin HEAD:DATA_METHODS_REFERENCE_FOR_AI --force
-
-      - name: Prepare for GitHub Pages
+      - name: Prepare GitHub Pages
         run: |
           mkdir -p public
           if [ -f DATA_METHODS_REFERENCE.html ]; then
             cp DATA_METHODS_REFERENCE.html public/index.html
           fi
 
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./public
+          path: public
 
   deploy:
     needs: build
