@@ -42,25 +42,8 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            # Save the generated file to a temporary location before switching branches
-            cp DATA_METHODS_REFERENCE.html /tmp/DATA_METHODS_REFERENCE.html
-
-            # Create or checkout the target branch
-            git fetch origin DATA_METHODS_REFERENCE_FOR_AI || true
-            git checkout -B DATA_METHODS_REFERENCE_FOR_AI origin/DATA_METHODS_REFERENCE_FOR_AI || git checkout -B DATA_METHODS_REFERENCE_FOR_AI
-
-            # Pull latest changes from remote to avoid non-fast-forward errors
-            git pull origin DATA_METHODS_REFERENCE_FOR_AI --no-rebase --strategy-option=theirs || true
-
-            # Restore the generated file from temporary location
-            cp /tmp/DATA_METHODS_REFERENCE.html DATA_METHODS_REFERENCE.html
-
-            # Add and commit generated file
-            git add DATA_METHODS_REFERENCE.html
-            git commit -m "update DATA_METHODS_REFERENCE.html" || echo "No changes to commit"
-
-            # Force push to ensure overwrite
-            git push origin DATA_METHODS_REFERENCE_FOR_AI --force
+            # Push only the DATA_METHODS_REFERENCE.html file to the target branch
+            git push origin HEAD:DATA_METHODS_REFERENCE_FOR_AI --force-with-lease
           else
             echo "DATA_METHODS_REFERENCE.html not found — skipping commit."
           fi
