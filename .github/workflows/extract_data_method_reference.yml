@@ -61,6 +61,9 @@ jobs:
             # Create a new (orphan) branch with no history
             git checkout --orphan temp-branch
 
+            # Clear the index (un-stage all files) from the old branch
+            git rm -rf --cached .
+
             # Add only the HTML file (use -f to force add if the file is in .gitignore)
             git add -f DATA_METHODS_REFERENCE.html
 
