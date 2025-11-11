@@ -42,16 +42,25 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
+            # Stash any local changes before switching branches
+            git stash
+
             # Create or checkout the target branch
             git fetch origin DATA_METHODS_REFERENCE_FOR_AI || true
             git checkout -B DATA_METHODS_REFERENCE_FOR_AI origin/DATA_METHODS_REFERENCE_FOR_AI || git checkout -B DATA_METHODS_REFERENCE_FOR_AI
+
+            # Pull latest changes from remote to avoid non-fast-forward errors
+            git pull origin DATA_METHODS_REFERENCE_FOR_AI --no-rebase --strategy-option=theirs || true
+
+            # Copy the generated file (since we stashed it)
+            cp ../DATA_METHODS_REFERENCE.html . || true
 
             # Add and commit generated file
             git add DATA_METHODS_REFERENCE.html
             git commit -m "update DATA_METHODS_REFERENCE.html" || echo "No changes to commit"
 
-            # Push changes to remote
-            git push origin DATA_METHODS_REFERENCE_FOR_AI
+            # Force push to ensure overwrite
+            git push origin DATA_METHODS_REFERENCE_FOR_AI --force
           else
             echo "DATA_METHODS_REFERENCE.html not found — skipping commit."
           fi
