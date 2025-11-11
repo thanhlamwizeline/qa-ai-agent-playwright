@@ -42,11 +42,20 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            # Fetch latest info from remote
-            git fetch origin
+            # Fetch the target branch
+            git fetch origin DATA_METHODS_REFERENCE_FOR_AI || true
 
-            # Push only the DATA_METHODS_REFERENCE.html file to the target branch with force
-            git push origin HEAD:DATA_METHODS_REFERENCE_FOR_AI --force
+            # Create a temporary directory for the target branch
+            TEMP_DIR=$(mktemp -d)
+            git clone --branch DATA_METHODS_REFERENCE_FOR_AI --single-branch https://github.com/${{ github.repository }}.git $TEMP_DIR
+
+            # Copy the updated file into the cloned branch
+            cp DATA_METHODS_REFERENCE.html "$TEMP_DIR/DATA_METHODS_REFERENCE.html"
+
+            cd $TEMP_DIR
+            git add DATA_METHODS_REFERENCE.html
+            git commit -m "Update DATA_METHODS_REFERENCE.html [auto]" || echo "No changes to commit"
+            git push origin DATA_METHODS_REFERENCE_FOR_AI --force
           else
             echo "DATA_METHODS_REFERENCE.html not found — skipping commit."
           fi
