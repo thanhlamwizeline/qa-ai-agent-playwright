@@ -42,8 +42,8 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            # Stash any local changes before switching branches
-            git stash
+            # Save the generated file to a temporary location before switching branches
+            cp DATA_METHODS_REFERENCE.html /tmp/DATA_METHODS_REFERENCE.html
 
             # Create or checkout the target branch
             git fetch origin DATA_METHODS_REFERENCE_FOR_AI || true
@@ -52,8 +52,8 @@ jobs:
             # Pull latest changes from remote to avoid non-fast-forward errors
             git pull origin DATA_METHODS_REFERENCE_FOR_AI --no-rebase --strategy-option=theirs || true
 
-            # Copy the generated file (since we stashed it)
-            cp ../DATA_METHODS_REFERENCE.html . || true
+            # Restore the generated file from temporary location
+            cp /tmp/DATA_METHODS_REFERENCE.html DATA_METHODS_REFERENCE.html
 
             # Add and commit generated file
             git add DATA_METHODS_REFERENCE.html
