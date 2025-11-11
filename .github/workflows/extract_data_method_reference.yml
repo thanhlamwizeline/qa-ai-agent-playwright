@@ -23,9 +23,9 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'  # or your preferred version
+          python-version: '3.11'
 
-      # 3. Install dependencies
+      # 3. Install dependencies (optional)
       - name: Install dependencies
         run: |
           pip install -r requirements.txt || true
@@ -37,25 +37,31 @@ jobs:
 
       # 5. Push generated HTML to DATA_METHODS_REFERENCE_FOR_AI branch
       - name: Push to DATA_METHODS_REFERENCE_FOR_AI branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -f DATA_METHODS_REFERENCE.html ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            # Fetch the target branch
+            # Define authenticated repo URL
+            REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+
+            # Fetch the target branch or create it if missing
             git fetch origin DATA_METHODS_REFERENCE_FOR_AI || true
 
-            # Create a temporary directory for the target branch
+            # Create a temporary directory and clone only that branch
             TEMP_DIR=$(mktemp -d)
-            git clone --branch DATA_METHODS_REFERENCE_FOR_AI --single-branch https://github.com/${{ github.repository }}.git $TEMP_DIR
+            git clone --depth 1 --branch DATA_METHODS_REFERENCE_FOR_AI --single-branch "$REPO_URL" "$TEMP_DIR" || \
+              git clone --depth 1 "$REPO_URL" "$TEMP_DIR" && cd "$TEMP_DIR" && git checkout -b DATA_METHODS_REFERENCE_FOR_AI
 
-            # Copy the updated file into the cloned branch
-            cp DATA_METHODS_REFERENCE.html "$TEMP_DIR/DATA_METHODS_REFERENCE.html"
+            # Copy updated file
+            cp "$GITHUB_WORKSPACE/DATA_METHODS_REFERENCE.html" "$TEMP_DIR/DATA_METHODS_REFERENCE.html"
 
-            cd $TEMP_DIR
+            cd "$TEMP_DIR"
             git add DATA_METHODS_REFERENCE.html
             git commit -m "Update DATA_METHODS_REFERENCE.html [auto]" || echo "No changes to commit"
-            git push origin DATA_METHODS_REFERENCE_FOR_AI --force
+            git push "$REPO_URL" DATA_METHODS_REFERENCE_FOR_AI --force
           else
             echo "DATA_METHODS_REFERENCE.html not found — skipping commit."
           fi
