@@ -262,12 +262,11 @@ This configuration allows the AI Agent to understand the specific structure and 
   "test_runner": {
     "description": "Test execution configuration. Used by test_runner.py to build install and test commands. Test result parsing is handled by parse_test_results() method in code",
     "install_command": "npm install",
-    "command_template": "npx playwright test {filter} {options} --workers=1",
+    "command_template": "npx playwright test {filter} --workers=1 --project=TestOnChrome --headed",
     "filter_strategies": {
-      "by_file": "{test_file_path}",
       "by_tag": "--grep @{tag}",
-      "by_name": "--grep \"{test_name}\"",
-      "by_project": "--project={project_name}"
+      "by_file": "{test_file_path}",
+      "by_name": "--grep \"{test_name}\""
     }
   },
 
