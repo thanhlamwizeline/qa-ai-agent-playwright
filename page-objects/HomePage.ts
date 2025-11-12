@@ -2,6 +2,7 @@ import { Locator, Page, expect } from '@playwright/test';
 
 import { BasePage } from './BasePage';
 import { Navigation } from './components/NavigationComponent';
+import { TESTCONFIG } from '../data/config/testconfig';
 
 export class Homepage extends BasePage {
   private readonly navigationComponent: Navigation;
@@ -9,6 +10,7 @@ export class Homepage extends BasePage {
   private readonly carousel: Locator;
   private readonly categoriesMenu: Locator;
   private readonly productList: Locator;
+  private readonly productsTableBody: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -17,6 +19,7 @@ export class Homepage extends BasePage {
     this.carousel = page.locator('#carouselExampleIndicators');
     this.categoriesMenu = page.locator('.list-group');
     this.productList = page.locator('#tbodyid');
+    this.productsTableBody = page.locator('#tbodyid');
   }
 
   async verifyWelcomUsernameOnNavigationBar(username: string){
@@ -62,5 +65,17 @@ export class Homepage extends BasePage {
   
   async verifyProductListIsVisible(){
     await expect(this.productList).toBeVisible();
-  }  
+  }
+
+  async navigateToHomePage(): Promise<void> {
+    await this.page.goto(`${process.env.BASE_URL_E2E}/${TESTCONFIG.FE_URL.URL_HOMEPAGE}`);
+  }
+
+  async verifyProductList(): Promise<void> {
+    await expect(this.productsTableBody).toBeVisible();
+  }
+
+  async verifyProductIsDisplayed(productName: string): Promise<void> {
+    await expect(this.page.locator('.card-title').filter({ hasText: productName })).toBeVisible();
+  }
 }
