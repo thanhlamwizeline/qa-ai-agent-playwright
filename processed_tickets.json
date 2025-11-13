@@ -3,5 +3,10 @@
     "ticket_key": "QAAGENT-44",
     "timestamp": "2025-11-10T14:20:53.577562",
     "status": "completed"
+  },
+  {
+    "ticket_key": "ITA-2",
+    "timestamp": "2025-11-13T00:02:25.395908",
+    "status": "completed"
   }
 ]
