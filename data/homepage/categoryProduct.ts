@@ -1,0 +1,19 @@
+export interface CategoryProductData {
+  categoryName: string;
+  productName: string;
+}
+
+export const categoryProductData: CategoryProductData[] = [
+  {
+    categoryName: 'Phones',
+    productName: 'Samsung galaxy s6'
+  },
+  {
+    categoryName: 'Laptops',
+    productName: 'Sony vaio i5'
+  },
+  {
+    categoryName: 'Monitors',
+    productName: 'Apple monitor 24'
+  }
+];
