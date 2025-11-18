@@ -120,11 +120,6 @@ class PlaywrightMethod:
             else:
                 return 'Clear content or reset state'
 
-        # Common actions - fallback with camelCase conversion
-        elif self.method_type == "common":
-            readable_method = re.sub(r'([a-z])([A-Z])', r'\1 \2', self.method_name).lower()
-            return f'Execute common utility: {readable_method}'
-
         # Generic page methods - work for any page type
         else:
             readable_method = re.sub(r'([a-z])([A-Z])', r'\1 \2', self.method_name).lower()
@@ -144,6 +139,24 @@ class PlaywrightMethod:
         }
 
 
+class LocatorDefinition:
+    """Represents a locator defined inside a page object."""
+
+    def __init__(self, class_name: str, property_name: str, assignment: str, location: str):
+        self.class_name = class_name
+        self.property_name = property_name
+        self.assignment = assignment.strip()
+        self.location = location
+
+    def to_dict(self) -> Dict:
+        return {
+            'class_name': self.class_name,
+            'property_name': self.property_name,
+            'assignment': self.assignment,
+            'location': self.location,
+        }
+
+
 def extract_methods_from_common_helpers(file_path: Path, relative_path: str) -> List[PlaywrightMethod]:
     """Extract static methods from CommonActionsHelpers.ts."""
     methods = []
@@ -151,9 +164,16 @@ def extract_methods_from_common_helpers(file_path: Path, relative_path: str) -> 
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Pattern to match static async methods
+    # Extract class name (same logic as extract_methods_from_page_object)
+    class_match = re.search(r'export\s+class\s+(\w+)', content)
+    if not class_match:
+        return methods
+
+    class_name = class_match.group(1)
+
+    # Pattern to match static async methods AND instance async methods
     method_pattern = re.compile(
-        r'static\s+async\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^{]+))?\s*{',
+        r'(?:static\s+)?async\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^{]+))?\s*{',
         re.MULTILINE
     )
 
@@ -167,12 +187,12 @@ def extract_methods_from_common_helpers(file_path: Path, relative_path: str) -> 
         location = f'{relative_path}:{line_num}'
 
         method = PlaywrightMethod(
-            class_name="CommonActions",
+            class_name=class_name,
             method_name=method_name,
             parameters=parameters,
             return_type=return_type,
             location=location,
-            method_type="common"
+            method_type="page_object"
         )
         methods.append(method)
 
@@ -228,6 +248,49 @@ def extract_methods_from_page_object(file_path: Path, relative_path: str) -> Lis
         methods.append(method)
 
     return methods
+
+
+def extract_locators_from_page_object(file_path: Path, relative_path: str):
+    """Extract locator definitions from a page object file."""
+    locators: List[LocatorDefinition] = []
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    class_match = re.search(r'export\s+class\s+(\w+)', content)
+    if not class_match:
+        return None, locators
+
+    class_name = class_match.group(1)
+
+    locator_pattern = re.compile(
+        r'^\s*private\s+(?:readonly\s+)?(\w+)\s*:\s*Locator\s*;',
+        re.MULTILINE
+    )
+
+    locator_names = []
+    for match in locator_pattern.finditer(content):
+        property_name = match.group(1)
+        line_num = content[:match.start()].count('\n') + 1
+        location = f'{relative_path}:{line_num}'
+        locator_names.append((property_name, location))
+
+    assignment_pattern = re.compile(
+        r'this\.(\w+)\s*=\s*([^;]+);',
+        re.MULTILINE | re.DOTALL
+    )
+
+    assignment_map = {}
+    for match in assignment_pattern.finditer(content):
+        property_name = match.group(1)
+        assignment = match.group(2).strip()
+        assignment_map[property_name] = re.sub(r'\s+', ' ', assignment)
+
+    for property_name, location in locator_names:
+        assignment = assignment_map.get(property_name, 'Not assigned')
+        locators.append(LocatorDefinition(class_name, property_name, assignment, location))
+
+    return class_name, locators
 
 
 # ============================================================================
@@ -323,12 +386,12 @@ def extract_data_from_file(file_path: Path, relative_path: str) -> List[TestData
 def generate_combined_html(
     all_methods: List[PlaywrightMethod],
     all_data: List[TestDataObject],
+    locators_by_class: Dict[str, List[LocatorDefinition]],
     output_file: str = 'DATA_METHODS_REFERENCE.html'
 ):
     """Generate combined HTML documentation with tabs for methods and data."""
 
     # Process methods
-    common_methods = [m for m in all_methods if m.method_type == "common"]
     page_methods = [m for m in all_methods if m.method_type == "page_object"]
     methods_by_class = {}
     for method in page_methods:
@@ -336,6 +399,9 @@ def generate_combined_html(
             methods_by_class[method.class_name] = []
         methods_by_class[method.class_name].append(method)
     methods_json = [m.to_dict() for m in all_methods]
+    locator_json = []
+    for locator_list in locators_by_class.values():
+        locator_json.extend([locator.to_dict() for locator in locator_list])
 
     # Process data
     data_by_category = {}
@@ -361,13 +427,14 @@ def generate_combined_html(
         return sorted_cats
 
     sorted_categories = sort_categories(data_by_category.keys())
+    total_locators = sum(len(locs) for locs in locators_by_class.values())
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page Methods & Test Data Reference for AI Test Case Generation</title>
+    <title>Page Methods, Locators & Test Data Reference for AI Test Case Generation</title>
     <style>
         :root {{
             --primary-color: #2196F3;
@@ -610,6 +677,15 @@ def generate_combined_html(
             margin-bottom: 15px;
             font-size: 14px;
             color: #6c757d;
+        }}
+
+        .search-section-title {{
+            margin: 25px 0 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }}
 
         .no-results {{
@@ -956,6 +1032,7 @@ def generate_combined_html(
         .table-step-type {{
             color: #4ade80;
             font-weight: bold;
+            font-size: 14px;
         }}
 
         .table-parameters {{
@@ -989,6 +1066,70 @@ def generate_combined_html(
             font-family: monospace;
             font-size: 11px;
             color: var(--primary-color);
+        }}
+
+        .locator-section {{
+            margin-bottom: 25px;
+        }}
+
+        .locator-section-header {{
+            background: #f1f3f5;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }}
+
+        .locator-grid {{
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }}
+
+        .locator-card {{
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 14px 12px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }}
+
+        .locator-name {{
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--primary-color);
+            min-width: 140px;
+            word-break: break-word;
+            display: flex;
+            align-items: center;
+        }}
+
+        .locator-definition {{
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 13px;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            word-break: break-word;
+        }}
+
+        .empty-state {{
+            padding: 15px 20px;
+            font-size: 14px;
+            color: #6c757d;
+            font-style: italic;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px dashed #dee2e6;
+            margin-bottom: 20px;
         }}
 
         @media (max-width: 768px) {{
@@ -1025,6 +1166,10 @@ def generate_combined_html(
             .data-table td {{
                 padding: 10px;
             }}
+
+            .locator-grid {{
+                grid-template-columns: 1fr;
+            }}
         }}
     </style>
 </head>
@@ -1040,7 +1185,7 @@ def generate_combined_html(
                     <option value="light">⚪</option>
                 </select>
             </div>
-            <h1>Page Methods & Test Data Reference</h1>
+            <h1>Page Methods, Locators & Test Data Reference</h1>
             <p>For AI Test Case Generation</p>
             <p style="font-size: 0.8em;">(Last generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} - UTC)</p>
         </div>
@@ -1048,10 +1193,10 @@ def generate_combined_html(
         <div class="tabs">
             <div class="tab-buttons">
                 <button class="tab-button active" onclick="switchTab('methods')">
-                    Page Methods <span style="opacity: 0.8;">({len(all_methods)})</span>
+                    Page Methods & Locators
                 </button>
                 <button class="tab-button" onclick="switchTab('data')">
-                    Test Data <span style="opacity: 0.8;">({len(all_data)})</span>
+                    Test Data
                 </button>
             </div>
         </div>
@@ -1064,7 +1209,7 @@ def generate_combined_html(
     html_content += f"""
             <div class="search-container">
                 <div class="search-wrapper">
-                    <input type="text" id="methodsSearchBox" class="search-box" placeholder="Search methods... (e.g., 'login', 'verify', 'click')" autocomplete="off">
+                    <input type="text" id="methodsSearchBox" class="search-box" placeholder="Search methods, locators... (e.g., 'login', 'verify', 'click')" autocomplete="off">
                     <button id="methodsSearchClear" class="search-clear" onclick="clearMethodsSearch()">✕</button>
                 </div>
                 <div class="search-help">
@@ -1080,13 +1225,36 @@ def generate_combined_html(
                 </div>
                 <div class="toc-content" id="methodsTocContent">
                     <ul class="toc-list">
-                        <li><a href="#common-methods">Common Actions <span class="item-count">{len(common_methods)} methods</span></a></li>
 """
 
-    for class_name in sorted(methods_by_class.keys()):
-        method_count = len(methods_by_class[class_name])
+    # Separate helper classes from page objects, display helpers first
+    all_class_names_set = set(list(methods_by_class.keys()) + list(locators_by_class.keys()))
+
+    # Identify helper classes (those that come from helpers folder)
+    helper_classes = []
+    page_object_classes = []
+
+    for class_name in all_class_names_set:
+        # Check if this class has methods from helpers folder
+        is_helper = False
+        for method in methods_by_class.get(class_name, []):
+            if method.location.startswith('helpers/'):
+                is_helper = True
+                break
+
+        if is_helper:
+            helper_classes.append(class_name)
+        else:
+            page_object_classes.append(class_name)
+
+    # Sort each group and combine: page objects first, then helpers
+    all_class_names = sorted(page_object_classes) + sorted(helper_classes)
+
+    for class_name in all_class_names:
+        method_count = len(methods_by_class.get(class_name, []))
+        locator_count = len(locators_by_class.get(class_name, []))
         anchor = class_name.lower()
-        html_content += f'                        <li><a href="#{anchor}">{class_name} <span class="item-count">{method_count} methods</span></a></li>\n'
+        html_content += f'                        <li><a href="#{anchor}">{class_name} <span class="item-count">{method_count} methods + {locator_count} locators</span></a></li>\n'
 
     html_content += """                    </ul>
                 </div>
@@ -1095,78 +1263,47 @@ def generate_combined_html(
             <div id="allMethods">
 """
 
-    # Add CommonActions section
-    if common_methods:
-        html_content += f"""
-            <div class="section" id="common-methods">
-                <div class="section-header" onclick="toggleSection('common-methods')">
-                    <span>CommonActions ({len(common_methods)} methods)</span>
-                    <button class="section-toggle" id="toggle_common-methods">▼</button>
-                </div>
-                <div class="section-content" id="content_common-methods">
-                    <div class="table-wrapper">
-                        <table class="steps-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 50%; text-align: left;">Method</th>
-                                    <th style="width: 25%;">Parameters</th>
-                                    <th style="width: 25%;">Purpose</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-"""
-
-        for method in common_methods:
-            params_html = "None"
-            if method.parsed_params:
-                params_html = ""
-                for param in method.parsed_params:
-                    params_html += f'<div class="table-param-item"><span class="table-param-type">{param["name"]}: {param["type"]}</span> - {param["description"]}</div>'
-
-            html_content += f"""
-                            <tr>
-                                <td>
-                                    <div class="table-step-pattern">
-                                        <div class="step-text scrollable">
-                                            <span class="table-step-type">{method.method_name}</span>({method.parameters})
-                                        </div>
-                                        <button class="copy-btn" onclick="copyMethodSignature('{method.method_name}', this)">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="table-location">{method.location}</div>
-                                </td>
-                                <td>
-                                    <div class="table-parameters">{params_html}</div>
-                                </td>
-                                <td>
-                                    <div class="table-purpose">{method.purpose}</div>
-                                </td>
-                            </tr>
-"""
-
-        html_content += """
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-"""
-
     # Add Page Object sections
-    for class_name in sorted(methods_by_class.keys()):
-        methods = methods_by_class[class_name]
+    for class_name in all_class_names:
+        methods = methods_by_class.get(class_name, [])
+        locators = locators_by_class.get(class_name, [])
+        method_count = len(methods)
+        locator_count = len(locators)
         anchor = class_name.lower()
 
         html_content += f"""
             <div class="section" id="{anchor}">
                 <div class="section-header" onclick="toggleSection('{anchor}')">
-                    <span>{class_name} ({len(methods)} methods)</span>
+                    <span>{class_name} ({method_count} methods + {locator_count} locators)</span>
                     <button class="section-toggle" id="toggle_{anchor}">▼</button>
                 </div>
                 <div class="section-content" id="content_{anchor}">
+"""
+
+        if locators:
+            html_content += """
+                    <div class="locator-section">
+                        <div class="locator-section-header">Locators</div>
+                        <div class="locator-grid">
+"""
+            for locator in locators:
+                html_content += f"""
+                            <div class="locator-card">
+                                <div class="locator-name">{locator.property_name}</div>
+                                <div class="locator-definition">{locator.assignment}</div>
+                            </div>
+"""
+            html_content += """
+                        </div>
+                    </div>
+"""
+        else:
+            html_content += """
+                    <div class="empty-state">No locators detected for this page object.</div>
+"""
+
+        if methods:
+            html_content += """
                     <div class="table-wrapper">
                         <table class="steps-table">
                             <thead>
@@ -1179,14 +1316,14 @@ def generate_combined_html(
                             <tbody>
 """
 
-        for method in methods:
-            params_html = "None"
-            if method.parsed_params:
-                params_html = ""
-                for param in method.parsed_params:
-                    params_html += f'<div class="table-param-item"><span class="table-param-type">{param["name"]}: {param["type"]}</span> - {param["description"]}</div>'
+            for method in methods:
+                params_html = "None"
+                if method.parsed_params:
+                    params_html = ""
+                    for param in method.parsed_params:
+                        params_html += f'<div class="table-param-item"><span class="table-param-type">{param["name"]}: {param["type"]}</span> - {param["description"]}</div>'
 
-            html_content += f"""
+                html_content += f"""
                             <tr>
                                 <td>
                                     <div class="table-step-pattern">
@@ -1199,7 +1336,6 @@ def generate_combined_html(
                                             </svg>
                                         </button>
                                     </div>
-                                    <div class="table-location">{method.location}</div>
                                 </td>
                                 <td>
                                     <div class="table-parameters">{params_html}</div>
@@ -1210,10 +1346,17 @@ def generate_combined_html(
                             </tr>
 """
 
-        html_content += """
+            html_content += """
                             </tbody>
                         </table>
                     </div>
+"""
+        else:
+            html_content += """
+                    <div class="empty-state">No methods detected for this page object.</div>
+"""
+
+        html_content += """
                 </div>
             </div>
 """
@@ -1370,6 +1513,9 @@ def generate_combined_html(
         // Methods data
         const methodDefinitions = {json.dumps(methods_json, indent=2)};
 
+        // Locator data
+        const locatorDefinitions = {json.dumps(locator_json, indent=2)};
+
         // Data definitions
         const dataDefinitions = {json.dumps(data_json, indent=8)};
 
@@ -1411,8 +1557,9 @@ def generate_combined_html(
                 return;
             }}
 
-            const results = searchMethods(query);
-            displayMethodsSearchResults(results, query);
+            const methodResults = searchMethods(query);
+            const locatorResults = searchLocators(query);
+            displayMethodsSearchResults(methodResults, locatorResults, query);
         }}
 
         function searchMethods(query) {{
@@ -1467,83 +1614,174 @@ def generate_combined_html(
             return results;
         }}
 
-        function displayMethodsSearchResults(results, query) {{
+        function searchLocators(query) {{
+            const queryLower = query.toLowerCase();
+            const results = [];
+
+            locatorDefinitions.forEach(locator => {{
+                let score = 0;
+                let matches = [];
+
+                if (locator.property_name.toLowerCase().includes(queryLower)) {{
+                    score += 100;
+                    matches.push('property_name');
+                }}
+
+                if (locator.class_name.toLowerCase().includes(queryLower)) {{
+                    score += 70;
+                    matches.push('class_name');
+                }}
+
+                if (locator.assignment.toLowerCase().includes(queryLower)) {{
+                    score += 60;
+                    matches.push('assignment');
+                }}
+
+                const queryWords = queryLower.split(/\\s+/);
+                queryWords.forEach(word => {{
+                    if (word.length > 2) {{
+                        if (locator.property_name.toLowerCase().includes(word)) score += 20;
+                        if (locator.class_name.toLowerCase().includes(word)) score += 15;
+                        if (locator.assignment.toLowerCase().includes(word)) score += 10;
+                    }}
+                }});
+
+                if (score > 0) {{
+                    results.push({{
+                        locator: locator,
+                        score: score,
+                        matches: matches
+                    }});
+                }}
+            }});
+
+            results.sort((a, b) => b.score - a.score);
+            return results;
+        }}
+
+        function displayMethodsSearchResults(methodResults, locatorResults, query) {{
             allMethods.style.display = 'none';
             methodsTableOfContents.style.display = 'none';
 
-            if (results.length === 0) {{
+            if (methodResults.length === 0 && locatorResults.length === 0) {{
                 methodsSearchResults.innerHTML = `
-                    <div class="search-stats">No results found for "${{query}}"</div>
+                    <div class="search-stats">No method or locator results found for "${{query}}"</div>
                     <div class="no-results">
-                        <p>🔍 No matching methods found.</p>
-                        <p>Try searching for method names like "login", "verify", "click".</p>
+                        <p>🔍 No matching methods or locators found.</p>
+                        <p>Try searching for keywords from method names, locator names, or assignments.</p>
                     </div>
                 `;
                 return;
             }}
 
-            let html = `<div class="search-stats">Found ${{results.length}} matching method${{results.length !== 1 ? 's' : ''}} for "${{query}}"</div>`;
+            const totalMatches = methodResults.length + locatorResults.length;
+            let html = `<div class="search-stats">Found ${{totalMatches}} match${{totalMatches !== 1 ? 'es' : ''}} for "${{query}}" (${{methodResults.length}} method${{methodResults.length !== 1 ? 's' : ''}}, ${{locatorResults.length}} locator${{locatorResults.length !== 1 ? 's' : ''}})</div>`;
 
-            html += `
-                <div class="table-wrapper">
-                    <table class="steps-table">
-                        <thead>
+            if (methodResults.length > 0) {{
+                html += `
+                    <h4 class="search-section-title">Method Matches (${{methodResults.length}})</h4>
+                    <div class="table-wrapper">
+                        <table class="steps-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%; text-align: left;">Method</th>
+                                    <th style="width: 25%;">Parameters</th>
+                                    <th style="width: 25%;">Purpose</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                methodResults.forEach(result => {{
+                    const method = result.method;
+
+                    let paramsHtml = "None";
+                    if (method.parsed_params && method.parsed_params.length > 0) {{
+                        paramsHtml = "";
+                        method.parsed_params.forEach(param => {{
+                            paramsHtml += `<div class="table-param-item"><span class="table-param-type">${{param.name}}: ${{param.type}}</span> - ${{param.description}}</div>`;
+                        }});
+                    }}
+
+                    const highlightedMethodName = highlightMatch(method.method_name, query);
+                    const highlightedClassName = highlightMatch(method.class_name, query);
+                    const highlightedPurpose = highlightMatch(method.purpose, query);
+
+                    html += `
                             <tr>
-                                <th style="width: 50%; text-align: left;">Method</th>
-                                <th style="width: 25%;">Parameters</th>
-                                <th style="width: 25%;">Purpose</th>
+                                <td>
+                                    <div class="table-step-pattern">
+                                        <div class="step-text scrollable">
+                                            <span class="table-step-type">${{highlightedMethodName}}</span>(${{method.parameters}})
+                                        </div>
+                                        <button class="copy-btn" onclick="copyMethodSignature('${{method.method_name}}', this)">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">
+                                        ${{highlightedClassName}}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="table-parameters">${{paramsHtml}}</div>
+                                </td>
+                                <td>
+                                    <div class="table-purpose">${{highlightedPurpose}}</div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            results.forEach(result => {{
-                const method = result.method;
-
-                let paramsHtml = "None";
-                if (method.parsed_params && method.parsed_params.length > 0) {{
-                    paramsHtml = "";
-                    method.parsed_params.forEach(param => {{
-                        paramsHtml += `<div class="table-param-item"><span class="table-param-type">${{param.name}}: ${{param.type}}</span> - ${{param.description}}</div>`;
-                    }});
-                }}
-
-                const highlightedMethodName = highlightMatch(method.method_name, query);
-                const highlightedClassName = highlightMatch(method.class_name, query);
-                const highlightedPurpose = highlightMatch(method.purpose, query);
+                    `;
+                }});
 
                 html += `
-                        <tr>
-                            <td>
-                                <div class="table-step-pattern">
-                                    <div class="step-text scrollable">
-                                        <span class="table-step-type">${{highlightedMethodName}}</span>(${{method.parameters}})
-                                    </div>
-                                    <button class="copy-btn" onclick="copyMethodSignature('${{method.method_name}}', this)">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">
-                                    ${{highlightedClassName}} | ${{method.location}} | Score: ${{result.score}}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="table-parameters">${{paramsHtml}}</div>
-                            </td>
-                            <td>
-                                <div class="table-purpose">${{highlightedPurpose}}</div>
-                            </td>
-                        </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 `;
-            }});
+            }}
 
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
+            if (locatorResults.length > 0) {{
+                html += `
+                    <h4 class="search-section-title">Locator Matches (${{locatorResults.length}})</h4>
+                    <div class="table-wrapper">
+                        <table class="steps-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30%; text-align: left;">Locator</th>
+                                    <th style="width: 70%;">Definition</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                locatorResults.forEach(result => {{
+                    const locator = result.locator;
+                    const highlightedLocatorName = highlightMatch(locator.property_name, query);
+                    const highlightedAssignment = highlightMatch(locator.assignment, query);
+                    const highlightedClassName = highlightMatch(locator.class_name, query);
+
+                    html += `
+                            <tr>
+                                <td>
+                                    <div class="table-step-type">${{highlightedLocatorName}}</div>
+                                    <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">
+                                        ${{highlightedClassName}}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="locator-definition">${{highlightedAssignment}}</div>
+                                </td>
+                            </tr>
+                    `;
+                }});
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }}
 
             methodsSearchResults.innerHTML = html;
         }}
@@ -1870,30 +2108,38 @@ def main():
 
     print(f"Scanning project: {project_root}")
 
-    # Extract methods
+    # Extract methods & locators
     all_methods = []
+    locators_by_class: Dict[str, List[LocatorDefinition]] = {}
 
-    # Extract from CommonActionsHelpers.ts
-    common_helpers_path = project_root / 'helpers' / 'CommonActionsHelpers.ts'
-    if common_helpers_path.exists():
-        relative_path = 'helpers/CommonActionsHelpers.ts'
-        common_methods = extract_methods_from_common_helpers(common_helpers_path, relative_path)
-        if common_methods:
-            print(f"   FOUND Methods: CommonActionsHelpers.ts: {len(common_methods)} methods")
-            all_methods.extend(common_methods)
+    # Extract from helpers/*.ts files
+    helpers_dir = project_root / 'helpers'
+    if helpers_dir.exists():
+        ts_files = sorted(helpers_dir.glob('*.ts'))
+        for ts_file in ts_files:
+            relative_path = f'helpers/{ts_file.name}'
+            common_methods = extract_methods_from_common_helpers(ts_file, relative_path)
+            if common_methods:
+                print(f"   FOUND Methods: {ts_file.name}: {len(common_methods)} methods")
+                all_methods.extend(common_methods)
 
     # Extract from page-objects/*.ts files
     page_objects_dir = project_root / 'page-objects'
+    excluded_page_objects = {'POManager.ts', 'BasePage.ts'}
+
     if page_objects_dir.exists():
         ts_files = sorted(page_objects_dir.glob('*.ts'))
         for ts_file in ts_files:
-            if ts_file.name == 'POManager.ts':
+            if ts_file.name in excluded_page_objects:
                 continue
             relative_path = f'page-objects/{ts_file.name}'
             page_methods = extract_methods_from_page_object(ts_file, relative_path)
             if page_methods:
                 print(f"   FOUND Methods: {ts_file.name}: {len(page_methods)} methods")
                 all_methods.extend(page_methods)
+            class_name, locators = extract_locators_from_page_object(ts_file, relative_path)
+            if class_name:
+                locators_by_class[class_name] = locators
 
     # Extract data
     all_data = []
@@ -1913,7 +2159,7 @@ def main():
 
     # Generate combined HTML
     output_path = project_root / args.output
-    generate_combined_html(all_methods, all_data, output_path)
+    generate_combined_html(all_methods, all_data, locators_by_class, output_path)
 
     print(f"\nGenerated: {output_path}")
     print(f"Total: {len(all_methods)} methods, {len(all_data)} data objects")
