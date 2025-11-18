@@ -2,6 +2,7 @@ import { Locator, Page, expect } from '@playwright/test';
 
 import { BasePage } from './BasePage';
 import { Navigation } from './components/NavigationComponent';
+import { TESTCONFIG } from '../data/config/testconfig';
 
 export class Homepage extends BasePage {
   private readonly navigationComponent: Navigation;
@@ -17,6 +18,16 @@ export class Homepage extends BasePage {
     this.carousel = page.locator('#carouselExampleIndicators');
     this.categoriesMenu = page.locator('.list-group');
     this.productList = page.locator('#tbodyid');
+  }
+
+  async navigateToHomePage(): Promise<void> {
+    const homePageUrl = `${process.env.BASE_URL_E2E}/${TESTCONFIG.FE_URL.URL_HOMEPAGE}`;
+    await this.page.goto(homePageUrl);
+  }
+
+  async verifyProductIsDisplayed(productName: string): Promise<void> {
+    const productLocator = this.page.locator('.card-title').filter({ hasText: productName });
+    await expect(productLocator).toBeVisible();
   }
 
   async verifyWelcomUsernameOnNavigationBar(username: string){
