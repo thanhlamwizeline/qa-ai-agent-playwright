@@ -271,6 +271,7 @@ This configuration allows the AI Agent to understand the specific structure and 
     "lint": {
       "description": "Code quality lint configuration. When enabled, AI Agent runs lint:fix in two places: (1) Step 6.5 after generating code and before running tests, (2) Step 8.5 after re-generating code in retry loop. Requires 'lint' and 'lint:fix' scripts in package.json",
       "enabled": true,
+      "install_command": "npm install",
       "check_command": "npm run lint",
       "fix_command": "npm run lint:fix"
     }
