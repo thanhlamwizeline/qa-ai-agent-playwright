@@ -31,10 +31,22 @@ export class Homepage extends BasePage {
     await this.navigationComponent.clickCartNavLink();
   }
 
-  async clickOnProduct(productName: string, productPrice: string) {
-    const selectedProduct = this.card_ProductItem
-      .filter({hasText: productName})
-      .filter({hasText: productPrice});
+  async clickCategory(categoryName: string): Promise<void> {
+    const categoryLink = this.page.getByRole('link', { name: categoryName });
+    await categoryLink.waitFor({ state: 'visible' });
+    await categoryLink.click();
+  }
+
+  async clickOnProduct(productName: string, productPrice?: string): Promise<void> {
+    let selectedProduct;
+    if (productPrice) {
+      selectedProduct = this.card_ProductItem
+        .filter({hasText: productName})
+        .filter({hasText: productPrice});
+    } else {
+      selectedProduct = this.card_ProductItem
+        .filter({hasText: productName});
+    }
     await selectedProduct.waitFor({state:'visible',timeout:5000});
     await selectedProduct.locator('.card-title').click();
   }
