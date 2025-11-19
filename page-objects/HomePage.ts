@@ -19,6 +19,18 @@ export class Homepage extends BasePage {
     this.productList = page.locator('#tbodyid');
   }
 
+  async navigateToHomepage(): Promise<void> {
+    await this.page.goto(`${process.env.BASE_URL_E2E}`);
+  }
+
+  async clickCategory(categoryName: string): Promise<void> {
+    await this.page.getByRole('link', { name: categoryName }).click();
+  }
+
+  async verifyProductIsDisplayed(productName: string): Promise<void> {
+    await expect(this.page.locator('.card-title').filter({ hasText: productName })).toBeVisible();
+  }
+
   async verifyWelcomUsernameOnNavigationBar(username: string){
     await this.navigationComponent.verifyUsernameOnNavigationBar(username);
   }
