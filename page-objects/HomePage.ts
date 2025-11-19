@@ -62,5 +62,18 @@ export class Homepage extends BasePage {
   
   async verifyProductListIsVisible(){
     await expect(this.productList).toBeVisible();
-  }  
+  }
+
+  async verifyProductList(): Promise<void> {
+    await expect(this.productList).toBeVisible();
+  }
+
+  async verifyProductIsDisplayed(productName: string): Promise<void> {
+    const productLocator = this.page.locator('.card-title').filter({ hasText: productName });
+    await expect(productLocator).toBeVisible();
+  }
+
+  async navigateToHomePage(): Promise<void> {
+    await this.page.goto(`${process.env.BASE_URL_E2E}/`);
+  }
 }
