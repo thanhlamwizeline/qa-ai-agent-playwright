@@ -1,6 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 
 import { TESTCONFIG } from '../data/config/testconfig.ts';
+import { PAYMENT_METHODS } from '../data/constants';
 import { TestHelpers } from '../helpers/TestHelpers';
 
 import { BasePage } from './BasePage';
@@ -26,9 +27,12 @@ export class CartPage extends BasePage {
     await this.page.waitForLoadState('load');
   }
 
-  async verifyProductInCart(productName: string, productPrice: string) {
-    await expect.poll(() => this.page.getByRole('row', {name: `${productName} ${productPrice}`}).count(), { timeout: 10000 }).toBeGreaterThan(0);
-
+  async verifyProductInCart(productName: string, productPrice?: string) {
+    if (productPrice) {
+      await expect.poll(() => this.page.getByRole('row', {name: `${productName} ${productPrice}`}).count(), { timeout: 10000 }).toBeGreaterThan(0);
+    } else {
+      await expect.poll(() => this.page.getByRole('row').filter({hasText: productName}).count(), { timeout: 10000 }).toBeGreaterThan(0);
+    }
   }
 
   async verifyTotalAmount(amount: string) {
@@ -37,6 +41,40 @@ export class CartPage extends BasePage {
 
   async verifyPlaceOrderButtonIsVisible() {
     await expect(this.btn_PlaceOrder).toBeVisible();
+  }
+
+  async clickPlaceOrder() {
+    await this.btn_PlaceOrder.waitFor({state:'visible'});
+    await this.btn_PlaceOrder.click();
+  }
+
+  async verifyPlaceOrderFormIsVisible() {
+    const placeOrderForm = this.page.locator('.modal-title', { hasText: 'Place order' });
+    await expect(placeOrderForm).toBeVisible();
+  }
+
+  async fillPlaceOrderForm() {
+    const nameField = this.page.getByRole("textbox", {name: 'Name'});
+    const creditCardField = this.page.getByRole("textbox", {name: 'Credit card'});
+    const monthField = this.page.getByRole("textbox", {name: 'Month'});
+    const yearField = this.page.getByRole("textbox", {name: 'Year'});
+
+    await nameField.waitFor({state:'visible'});
+    await nameField.fill(PAYMENT_METHODS.VALID_CARD.cardHolder);
+    await creditCardField.fill(PAYMENT_METHODS.VALID_CARD.cardNumber);
+    await monthField.fill(PAYMENT_METHODS.VALID_CARD.expiryMonth);
+    await yearField.fill(PAYMENT_METHODS.VALID_CARD.expiryYear);
+  }
+
+  async clickPurchase() {
+    const purchaseButton = this.page.getByRole("button", { name: 'Purchase' });
+    await purchaseButton.waitFor({state:'visible'});
+    await purchaseButton.click();
+  }
+
+  async verifyPurchaseMessage(expectedMessage: string) {
+    const messageLocator = this.page.getByText(expectedMessage);
+    await expect(messageLocator).toBeVisible();
   }
 
   async clearCart() {
