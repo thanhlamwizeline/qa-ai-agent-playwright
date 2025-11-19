@@ -267,6 +267,12 @@ This configuration allows the AI Agent to understand the specific structure and 
       "by_tag": "--grep @{tag}",
       "by_file": "{test_file_path}",
       "by_name": "--grep \"{test_name}\""
+    },
+    "lint": {
+      "description": "Code quality lint configuration. When enabled, AI Agent runs lint:fix in two places: (1) Step 6.5 after generating code and before running tests, (2) Step 8.5 after re-generating code in retry loop. Requires 'lint' and 'lint:fix' scripts in package.json",
+      "enabled": true,
+      "check_command": "npm run lint",
+      "fix_command": "npm run lint:fix"
     }
   },
 
@@ -294,8 +300,20 @@ This configuration allows the AI Agent to understand the specific structure and 
   - `repository_structure` - Directory paths specific to your repo
   - `architectural_files` - Critical files AI should analyze
   - `file_naming_patterns` - Naming conventions for generated files
+  - `test_runner.lint` - Enable/disable lint, customize lint commands
   - `code_style_conventions` - Code style (indentation, quotes, etc.)
   - `syntax_patterns` - Language-specific syntax (if needed)
+
+**Example: Disable lint for this repo**
+```json
+{
+  "test_runner": {
+    "lint": {
+      "enabled": false
+    }
+  }
+}
+```
 
 **Merge Priority:**
 ```
