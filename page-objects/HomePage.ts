@@ -62,5 +62,14 @@ export class Homepage extends BasePage {
   
   async verifyProductListIsVisible(){
     await expect(this.productList).toBeVisible();
-  }  
+  }
+
+  async clickCategory(name: string): Promise<void> {
+    await this.categoriesMenu.getByRole('link', { name: name }).click();
+  }
+
+  async verifyProductIsDisplayed(productName: string): Promise<void> {
+    const productElement = this.page.locator('.card-title').filter({ hasText: productName });
+    await expect(productElement).toBeVisible();
+  }
 }
