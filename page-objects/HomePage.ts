@@ -19,6 +19,10 @@ export class Homepage extends BasePage {
     this.productList = page.locator('#tbodyid');
   }
 
+  async goToHomePage(): Promise<void> {
+    await this.page.goto(`${process.env.BASE_URL_E2E}/`);
+  }
+
   async verifyWelcomUsernameOnNavigationBar(username: string){
     await this.navigationComponent.verifyUsernameOnNavigationBar(username);
   }
@@ -62,5 +66,10 @@ export class Homepage extends BasePage {
   
   async verifyProductListIsVisible(){
     await expect(this.productList).toBeVisible();
-  }  
+  }
+
+  async verifyProductIsDisplayed(productName: string): Promise<void> {
+    const productLocator = this.page.locator('.card-title').filter({ hasText: productName });
+    await expect(productLocator).toBeVisible();
+  }
 }
