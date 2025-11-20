@@ -1,5 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 
+import { TESTCONFIG } from '../data/config/testconfig.ts';
+
 import { BasePage } from './BasePage';
 import { Navigation } from './components/NavigationComponent';
 
@@ -31,10 +33,18 @@ export class Homepage extends BasePage {
     await this.navigationComponent.clickCartNavLink();
   }
 
-  async clickOnProduct(productName: string, productPrice: string) {
-    const selectedProduct = this.card_ProductItem
-      .filter({hasText: productName})
-      .filter({hasText: productPrice});
+  async clickOnProduct(productName: string, productPrice?: string) {
+    let selectedProduct: Locator;
+    
+    if (productPrice) {
+      selectedProduct = this.card_ProductItem
+        .filter({hasText: productName})
+        .filter({hasText: productPrice});
+    } else {
+      selectedProduct = this.card_ProductItem
+        .filter({hasText: productName});
+    }
+    
     await selectedProduct.waitFor({state:'visible',timeout:5000});
     await selectedProduct.locator('.card-title').click();
   }
@@ -62,5 +72,15 @@ export class Homepage extends BasePage {
   
   async verifyProductListIsVisible(){
     await expect(this.productList).toBeVisible();
-  }  
+  }
+
+  async clickCategory(categoryName: string) {
+    const categoryLink = this.page.getByRole('link', { name: categoryName });
+    await categoryLink.click();
+  }
+
+  async navigateToHomepage() {
+    const homepageUrl = `${process.env.BASE_URL_E2E}/${TESTCONFIG.FE_URL.URL_HOMEPAGE}`;
+    await this.page.goto(homepageUrl);
+  }
 }

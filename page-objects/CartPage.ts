@@ -1,6 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 
 import { TESTCONFIG } from '../data/config/testconfig.ts';
+import { PAYMENT_METHODS } from '../data/constants.ts';
 import { TestHelpers } from '../helpers/TestHelpers';
 
 import { BasePage } from './BasePage';
@@ -26,9 +27,12 @@ export class CartPage extends BasePage {
     await this.page.waitForLoadState('load');
   }
 
-  async verifyProductInCart(productName: string, productPrice: string) {
-    await expect.poll(() => this.page.getByRole('row', {name: `${productName} ${productPrice}`}).count(), { timeout: 10000 }).toBeGreaterThan(0);
-
+  async verifyProductInCart(productName: string, productPrice?: string) {
+    if (productPrice) {
+      await expect.poll(() => this.page.getByRole('row', {name: `${productName} ${productPrice}`}).count(), { timeout: 10000 }).toBeGreaterThan(0);
+    } else {
+      await expect.poll(() => this.page.getByRole('row').filter({hasText: productName}).count(), { timeout: 10000 }).toBeGreaterThan(0);
+    }
   }
 
   async verifyTotalAmount(amount: string) {
@@ -52,4 +56,29 @@ export class CartPage extends BasePage {
     await this.navigationComponent.clickHomeNavLink();
   }
 
+  async clickPlaceOrder() {
+    const placeOrderButton = this.page.getByRole('button', { name: 'Place Order' });
+    await placeOrderButton.click();
+  }
+
+  async verifyPlaceOrderFormIsVisible() {
+    const placeOrderForm = this.page.locator('.modal-title', { hasText: 'Place order' });
+    await expect(placeOrderForm).toBeVisible();
+  }
+
+  async fillPlaceOrderForm() {
+    await this.page.getByRole('textbox', { name: 'Name' }).fill(PAYMENT_METHODS.VALID_CARD.cardHolder);
+    await this.page.getByRole('textbox', { name: 'Credit card' }).fill(PAYMENT_METHODS.VALID_CARD.cardNumber);
+    await this.page.getByRole('textbox', { name: 'Month' }).fill(PAYMENT_METHODS.VALID_CARD.expiryMonth);
+    await this.page.getByRole('textbox', { name: 'Year' }).fill(PAYMENT_METHODS.VALID_CARD.expiryYear);
+  }
+
+  async clickPurchase() {
+    const purchaseButton = this.page.getByRole('button', { name: 'Purchase' });
+    await purchaseButton.click();
+  }
+
+  async verifySuccessMessage(expectedMessage: string) {
+    await expect(this.page.getByText(expectedMessage)).toBeVisible();
+  }
 }
