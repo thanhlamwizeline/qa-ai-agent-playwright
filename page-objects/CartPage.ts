@@ -1,6 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 
 import { TESTCONFIG } from '../data/config/testconfig.ts';
+import { PAYMENT_METHODS } from '../data/constants.ts';
 import { TestHelpers } from '../helpers/TestHelpers';
 
 import { BasePage } from './BasePage';
@@ -20,26 +21,52 @@ export class CartPage extends BasePage {
     this.btn_PlaceOrder = page.getByRole('button', {name: 'Place Order'});
   }
 
-  async verifyCartPageLoadsSuccessfully() {
+  async verifyCartPageLoadsSuccessfully(): Promise<void> {
     const cartURL = `${process.env.BASE_URL_E2E}/${TESTCONFIG.FE_URL.URL_CARTPAGE}`;
     await this.page.waitForURL(new RegExp(`^${cartURL}`));
     await this.page.waitForLoadState('load');
   }
 
-  async verifyProductInCart(productName: string, productPrice: string) {
-    await expect.poll(() => this.page.getByRole('row', {name: `${productName} ${productPrice}`}).count(), { timeout: 10000 }).toBeGreaterThan(0);
-
+  async verifyProductInCart(productName: string, productPrice?: string): Promise<void> {
+    if (productPrice) {
+      await expect.poll(() => this.page.getByRole('row', {name: `${productName} ${productPrice}`}).count(), { timeout: 10000 }).toBeGreaterThan(0);
+    } else {
+      await expect.poll(() => this.page.getByRole('row').filter({hasText: productName}).count(), { timeout: 10000 }).toBeGreaterThan(0);
+    }
   }
 
-  async verifyTotalAmount(amount: string) {
+  async verifyTotalAmount(amount: string): Promise<void> {
     await expect(this.lbl_TotalAmount).toHaveText(amount);
   }
 
-  async verifyPlaceOrderButtonIsVisible() {
+  async verifyPlaceOrderButtonIsVisible(): Promise<void> {
     await expect(this.btn_PlaceOrder).toBeVisible();
   }
 
-  async clearCart() {
+  async clickPlaceOrder(): Promise<void> {
+    await this.page.getByRole('button', { name: 'Place Order' }).click();
+  }
+
+  async verifyPlaceOrderFormIsVisible(): Promise<void> {
+    await expect(this.page.locator('.modal-title', { hasText: 'Place order' })).toBeVisible();
+  }
+
+  async fillPlaceOrderForm(): Promise<void> {
+    await this.page.getByRole('textbox', {name: 'Name'}).fill(PAYMENT_METHODS.VALID_CARD.cardHolder);
+    await this.page.getByRole('textbox', {name: 'Credit card'}).fill(PAYMENT_METHODS.VALID_CARD.cardNumber);
+    await this.page.getByRole('textbox', {name: 'Month'}).fill(PAYMENT_METHODS.VALID_CARD.expiryMonth);
+    await this.page.getByRole('textbox', {name: 'Year'}).fill(PAYMENT_METHODS.VALID_CARD.expiryYear);
+  }
+
+  async clickPurchase(): Promise<void> {
+    await this.page.getByRole('button', { name: 'Purchase' }).click();
+  }
+
+  async verifyPurchaseSuccessMessage(): Promise<void> {
+    await expect(this.page.getByText('Thank you for your purchase')).toBeVisible();
+  }
+
+  async clearCart(): Promise<void> {
     await this.btn_PlaceOrder.waitFor({state:'visible'});
     await TestHelpers.waitForNumberOfSeconds(this.page, 2);
     const count = await this.btn_Delete.count();
@@ -51,5 +78,4 @@ export class CartPage extends BasePage {
     }
     await this.navigationComponent.clickHomeNavLink();
   }
-
 }
