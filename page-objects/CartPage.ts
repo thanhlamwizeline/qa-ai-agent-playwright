@@ -1,6 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 
 import { TESTCONFIG } from '../data/config/testconfig.ts';
+import { PAYMENT_METHODS } from '../data/constants';
 import { TestHelpers } from '../helpers/TestHelpers';
 
 import { BasePage } from './BasePage';
@@ -26,9 +27,12 @@ export class CartPage extends BasePage {
     await this.page.waitForLoadState('load');
   }
 
-  async verifyProductInCart(productName: string, productPrice: string) {
-    await expect.poll(() => this.page.getByRole('row', {name: `${productName} ${productPrice}`}).count(), { timeout: 10000 }).toBeGreaterThan(0);
-
+  async verifyProductInCart(productName: string, productPrice?: string): Promise<void> {
+    if (productPrice) {
+      await expect.poll(() => this.page.getByRole('row', {name: `${productName} ${productPrice}`}).count(), { timeout: 10000 }).toBeGreaterThan(0);
+    } else {
+      await expect.poll(() => this.page.getByRole('row').filter({ hasText: productName }).count(), { timeout: 10000 }).toBeGreaterThan(0);
+    }
   }
 
   async verifyTotalAmount(amount: string) {
@@ -37,6 +41,29 @@ export class CartPage extends BasePage {
 
   async verifyPlaceOrderButtonIsVisible() {
     await expect(this.btn_PlaceOrder).toBeVisible();
+  }
+
+  async clickPlaceOrder(): Promise<void> {
+    await this.btn_PlaceOrder.click();
+  }
+
+  async verifyPlaceOrderFormIsVisible(): Promise<void> {
+    await expect(this.page.locator('.modal-title', { hasText: 'Place order' })).toBeVisible();
+  }
+
+  async fillPlaceOrderForm(): Promise<void> {
+    await this.page.getByRole('textbox', { name: 'Name' }).fill(PAYMENT_METHODS.VALID_CARD.cardHolder);
+    await this.page.getByRole('textbox', { name: 'Credit card' }).fill(PAYMENT_METHODS.VALID_CARD.cardNumber);
+    await this.page.getByRole('textbox', { name: 'Month' }).fill(PAYMENT_METHODS.VALID_CARD.expiryMonth);
+    await this.page.getByRole('textbox', { name: 'Year' }).fill(PAYMENT_METHODS.VALID_CARD.expiryYear);
+  }
+
+  async clickPurchase(): Promise<void> {
+    await this.page.getByRole('button', { name: 'Purchase' }).click();
+  }
+
+  async verifyThankYouMessage(): Promise<void> {
+    await expect(this.page.getByText('Thank you for your purchase')).toBeVisible();
   }
 
   async clearCart() {
