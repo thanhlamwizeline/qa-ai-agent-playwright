@@ -9,6 +9,7 @@ export class Homepage extends BasePage {
   private readonly carousel: Locator;
   private readonly categoriesMenu: Locator;
   private readonly productList: Locator;
+  private readonly productsTableBody: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -17,6 +18,20 @@ export class Homepage extends BasePage {
     this.carousel = page.locator('#carouselExampleIndicators');
     this.categoriesMenu = page.locator('.list-group');
     this.productList = page.locator('#tbodyid');
+    this.productsTableBody = page.locator('#tbodyid');
+  }
+
+  async navigateToHomePage(): Promise<void> {
+    await this.page.goto(`${process.env.BASE_URL_E2E}`);
+  }
+
+  async verifyProductList(): Promise<void> {
+    await expect(this.productsTableBody).toBeVisible();
+  }
+
+  async verifyProductIsDisplayed(productName: string): Promise<void> {
+    const productElement = this.page.locator('.card-title').filter({ hasText: productName });
+    await expect(productElement).toBeVisible();
   }
 
   async verifyWelcomUsernameOnNavigationBar(username: string){
