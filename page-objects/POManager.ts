@@ -2,6 +2,7 @@ import { Page } from '@playwright/test';
 
 import { CartPage } from './CartPage';
 import { Homepage } from './HomePage';
+import { InventoryPage } from './InventoryPage';
 import { LoginPage } from './LoginPage';
 import { ProductDetailPage } from './ProductDetailPage';
 
@@ -11,6 +12,7 @@ export class POManager {
   private readonly homepage: Homepage;
   private readonly productDetailPage: ProductDetailPage;
   private readonly cartPage: CartPage;
+  private readonly inventoryPage: InventoryPage;
     
   constructor(page: Page){
     this.page = page;
@@ -18,21 +20,26 @@ export class POManager {
     this.homepage = new Homepage(this.page);
     this.productDetailPage = new ProductDetailPage(this.page);
     this.cartPage = new CartPage(this.page);
+    this.inventoryPage = new InventoryPage(this.page);
   }
 
-  getLoginPage(){
+  getLoginPage(): LoginPage {
     return this.loginPage;
   }
 
-  getHomepage(){
+  getHomepage(): Homepage {
     return this.homepage;
   }
 
-  getProductDetailPage(){
+  getProductDetailPage(): ProductDetailPage {
     return this.productDetailPage;
   }
 
-  getCartPage(){
+  getCartPage(): CartPage {
     return this.cartPage;
+  }
+
+  getInventoryPage(): InventoryPage {
+    return this.inventoryPage;
   }
 }
