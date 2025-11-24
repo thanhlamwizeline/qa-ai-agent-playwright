@@ -19,48 +19,45 @@ export class Homepage extends BasePage {
     this.productList = page.locator('#tbodyid');
   }
 
-  async verifyWelcomUsernameOnNavigationBar(username: string){
+  async verifyWelcomUsernameOnNavigationBar(username: string): Promise<void> {
     await this.navigationComponent.verifyUsernameOnNavigationBar(username);
   }
- 
-  async clickLogin() {
+
+  async clickLogin(): Promise<void> {
     await this.navigationComponent.clickLoginNavLink();
   }
 
-  async goToCart() {
+  async goToCart(): Promise<void> {
     await this.navigationComponent.clickCartNavLink();
   }
 
-  async clickOnProduct(productName: string, productPrice: string) {
-    const selectedProduct = this.card_ProductItem
-      .filter({hasText: productName})
-      .filter({hasText: productPrice});
-    await selectedProduct.waitFor({state:'visible',timeout:5000});
-    await selectedProduct.locator('.card-title').click();
+  async clickCategory(categoryName: string): Promise<void> {
+    await this.page.getByRole('link', { name: categoryName }).click();
   }
 
-  async verifyLogoutNavLinkVisibleOnHomePage(){
+  async clickOnProduct(productName: string, productPrice?: string): Promise<void> {
+    await this.page.getByRole('link', { name: productName }).click();
+  }
+
+  async verifyLogoutNavLinkVisibleOnHomePage(): Promise<void> {
     await this.navigationComponent.verifyLogoutNavLinkVisible();
   }
 
-  async getProductImg(productName: string): Promise<Locator>{
-    return this.page.locator('//div')
-      .filter({ has: this.page.locator('img')})
-      .filter({ has: this.page.getByRole('link', { name: `${productName}` }) })
-      .last().locator('img');
+  async getProductImg(productName: string): Promise<Locator> {
+    return this.page.locator(`img[alt="${productName}"]`);
   }
 
-  async verifyCarouselIsVisible(){
+  async verifyCarouselIsVisible(): Promise<void> {
     await expect(this.carousel).toBeVisible();
   }
 
-  async verifyCatergoryMenuContainsCorrectItems(items: string[]){
+  async verifyCatergoryMenuContainsCorrectItems(items: string[]): Promise<void> {
     for (const item of items) {
-      await expect(this.categoriesMenu.getByRole('link', { name: item})).toBeVisible();
+      await expect(this.categoriesMenu).toContainText(item);
     }
   }
-  
-  async verifyProductListIsVisible(){
+
+  async verifyProductListIsVisible(): Promise<void> {
     await expect(this.productList).toBeVisible();
-  }  
+  }
 }
