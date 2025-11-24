@@ -1,5 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 
+import { TESTCONFIG } from '../data/config/testconfig';
+
 import { BasePage } from './BasePage';
 import { Navigation } from './components/NavigationComponent';
 
@@ -9,6 +11,7 @@ export class Homepage extends BasePage {
   private readonly carousel: Locator;
   private readonly categoriesMenu: Locator;
   private readonly productList: Locator;
+  private readonly productsTableBody: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -17,21 +20,34 @@ export class Homepage extends BasePage {
     this.carousel = page.locator('#carouselExampleIndicators');
     this.categoriesMenu = page.locator('.list-group');
     this.productList = page.locator('#tbodyid');
+    this.productsTableBody = page.locator('#tbodyid');
   }
 
-  async verifyWelcomUsernameOnNavigationBar(username: string){
+  async navigateToHomePage(): Promise<void> {
+    const baseUrl = process.env.BASE_URL_E2E || '';
+    const homeUrl = TESTCONFIG.FE_URL?.URL_HOMEPAGE || '';
+    const fullUrl = `${baseUrl}/${homeUrl}`.replace(/\/+/g, '/').replace(':/', '://');
+    await this.page.goto(fullUrl);
+  }
+
+  async verifyProductIsDisplayed(productName: string): Promise<void> {
+    const productTitle = this.page.locator('.card-title').filter({ hasText: productName });
+    await expect(productTitle).toBeVisible();
+  }
+
+  async verifyWelcomUsernameOnNavigationBar(username: string): Promise<void> {
     await this.navigationComponent.verifyUsernameOnNavigationBar(username);
   }
  
-  async clickLogin() {
+  async clickLogin(): Promise<void> {
     await this.navigationComponent.clickLoginNavLink();
   }
 
-  async goToCart() {
+  async goToCart(): Promise<void> {
     await this.navigationComponent.clickCartNavLink();
   }
 
-  async clickOnProduct(productName: string, productPrice: string) {
+  async clickOnProduct(productName: string, productPrice: string): Promise<void> {
     const selectedProduct = this.card_ProductItem
       .filter({hasText: productName})
       .filter({hasText: productPrice});
@@ -39,7 +55,7 @@ export class Homepage extends BasePage {
     await selectedProduct.locator('.card-title').click();
   }
 
-  async verifyLogoutNavLinkVisibleOnHomePage(){
+  async verifyLogoutNavLinkVisibleOnHomePage(): Promise<void> {
     await this.navigationComponent.verifyLogoutNavLinkVisible();
   }
 
@@ -50,17 +66,18 @@ export class Homepage extends BasePage {
       .last().locator('img');
   }
 
-  async verifyCarouselIsVisible(){
+  async verifyCarouselIsVisible(): Promise<void> {
     await expect(this.carousel).toBeVisible();
   }
 
-  async verifyCatergoryMenuContainsCorrectItems(items: string[]){
-    for (const item of items) {
-      await expect(this.categoriesMenu.getByRole('link', { name: item})).toBeVisible();
+  async verifyCatergoryMenuContainsCorrectItems(items: string[]): Promise<void> {
+    for(const item of items) {
+      const categoryItem = this.categoriesMenu.getByRole('link', { name: item });
+      await expect(categoryItem).toBeVisible();
     }
   }
-  
-  async verifyProductListIsVisible(){
-    await expect(this.productList).toBeVisible();
-  }  
+
+  async verifyProductListIsVisible(): Promise<void> {
+    await expect(this.productsTableBody).toBeVisible();
+  }
 }
