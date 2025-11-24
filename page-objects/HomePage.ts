@@ -1,10 +1,12 @@
 import { Locator, Page, expect } from '@playwright/test';
 
+import { TESTCONFIG } from '../data/config/testconfig.ts';
+
 import { BasePage } from './BasePage';
 import { Navigation } from './components/NavigationComponent';
 
 export class Homepage extends BasePage {
-  private readonly navigationComponent: Navigation;
+  readonly navigationComponent: Navigation;
   private readonly card_ProductItem: Locator;
   private readonly carousel: Locator;
   private readonly categoriesMenu: Locator;
@@ -19,6 +21,18 @@ export class Homepage extends BasePage {
     this.productList = page.locator('#tbodyid');
   }
 
+  async navigateToHomepage() {
+    const homeURL = `${process.env.BASE_URL_E2E}/${TESTCONFIG.FE_URL.URL_HOMEPAGE}`;
+    await this.page.goto(homeURL);
+    await this.page.waitForLoadState('load');
+  }
+
+  async clickCategory(categoryName: string) {
+    const categoryLink = this.categoriesMenu.getByRole('link', { name: categoryName });
+    await categoryLink.waitFor({ state: 'visible' });
+    await categoryLink.click();
+  }
+
   async verifyWelcomUsernameOnNavigationBar(username: string){
     await this.navigationComponent.verifyUsernameOnNavigationBar(username);
   }
@@ -31,12 +45,19 @@ export class Homepage extends BasePage {
     await this.navigationComponent.clickCartNavLink();
   }
 
-  async clickOnProduct(productName: string, productPrice: string) {
-    const selectedProduct = this.card_ProductItem
-      .filter({hasText: productName})
-      .filter({hasText: productPrice});
-    await selectedProduct.waitFor({state:'visible',timeout:5000});
-    await selectedProduct.locator('.card-title').click();
+  async clickOnProduct(productName: string, productPrice?: string) {
+    if (productPrice) {
+      const selectedProduct = this.card_ProductItem
+        .filter({hasText: productName})
+        .filter({hasText: productPrice});
+      await selectedProduct.waitFor({state:'visible',timeout:5000});
+      await selectedProduct.locator('.card-title').click();
+    } else {
+      const selectedProduct = this.card_ProductItem
+        .filter({hasText: productName});
+      await selectedProduct.waitFor({state:'visible',timeout:5000});
+      await selectedProduct.locator('.card-title').click();
+    }
   }
 
   async verifyLogoutNavLinkVisibleOnHomePage(){
