@@ -1,5 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 
+import { TESTCONFIG } from '../data/config/testconfig';
+
 import { BasePage } from './BasePage';
 import { Navigation } from './components/NavigationComponent';
 
@@ -17,6 +19,20 @@ export class Homepage extends BasePage {
     this.carousel = page.locator('#carouselExampleIndicators');
     this.categoriesMenu = page.locator('.list-group');
     this.productList = page.locator('#tbodyid');
+  }
+
+  async navigateToHomePage(): Promise<void> {
+    await this.page.goto(`${process.env.BASE_URL_E2E}/${TESTCONFIG.FE_URL.URL_HOMEPAGE}`);
+  }
+
+  async verifyProductList(): Promise<void> {
+    const productsTableBody = this.page.locator('#tbodyid');
+    await expect(productsTableBody).toBeVisible();
+  }
+
+  async verifyProductIsDisplayed(productName: string): Promise<void> {
+    const productElement = this.page.locator('.card-title').filter({ hasText: productName });
+    await expect(productElement).toBeVisible();
   }
 
   async verifyWelcomUsernameOnNavigationBar(username: string){
