@@ -2,9 +2,17 @@
 """
 Generate HTML reference combining both Page Methods and Test Data with tab navigation.
 
-Usage:
+CONFIGURATION:
+Before running this script, update the constants at the top of this file to match your project structure:
+- HELPERS_DIR: Path to your helpers/utilities directory (For Method Extraction)
+- PAGE_OBJECTS_DIR: Path to your page objects directory (For Method and Locator Extraction)
+- DATA_DIR: Path to your test data directory (For Test Data Extraction)
+- EXCLUDED_PAGE_OBJECTS: Files to skip in page objects directory
+- EXCLUDED_DATA_FILES: Files to skip in data directory
+
+USAGE:
     python scripts/extract_data_and_method_reference.py
-    python scripts/extract_data_and_method_reference.py --output DATA_METHODS_REFERENCE.html
+    python scripts/extract_data_and_method_reference.py --output MY_REFERENCE.html
 """
 
 import re
@@ -13,6 +21,27 @@ from datetime import datetime, timezone
 import argparse
 from typing import List, Dict
 import json
+
+
+# ============================================================================
+# CONFIGURATION CONSTANTS - Update these paths to match your project structure
+# ============================================================================
+
+# Directory paths (can be relative to project root or absolute paths)
+# Examples:
+#   - 'helpers' (relative to project root)
+#   - 'src/helpers' (nested relative path)
+#   - '/absolute/path/to/helpers' (absolute path)
+HELPERS_DIR = 'helpers'
+PAGE_OBJECTS_DIR = 'page-objects'
+DATA_DIR = 'data'
+
+# Excluded files (add any files you want to skip)
+EXCLUDED_PAGE_OBJECTS = {'POManager.ts', 'BasePage.ts'}
+EXCLUDED_DATA_FILES = {'data-interfaces.ts'}
+
+# Default output file name
+DEFAULT_OUTPUT_FILE = 'DATA_METHODS_REFERENCE.html'
 
 
 # ============================================================================
@@ -1238,7 +1267,7 @@ def generate_combined_html(
         # Check if this class has methods from helpers folder
         is_helper = False
         for method in methods_by_class.get(class_name, []):
-            if method.location.startswith('helpers/'):
+            if method.location.startswith(f'{HELPERS_DIR}/'):
                 is_helper = True
                 break
 
@@ -2097,8 +2126,8 @@ def main():
     parser.add_argument(
         '--output',
         '-o',
-        default='DATA_METHODS_REFERENCE.html',
-        help='Output HTML file (default: DATA_METHODS_REFERENCE.html)'
+        default=DEFAULT_OUTPUT_FILE,
+        help=f'Output HTML file (default: {DEFAULT_OUTPUT_FILE})'
     )
 
     args = parser.parse_args()
@@ -2112,27 +2141,37 @@ def main():
     all_methods = []
     locators_by_class: Dict[str, List[LocatorDefinition]] = {}
 
+    # Helper function to resolve directory paths (absolute or relative)
+    def resolve_directory(dir_path: str) -> Path:
+        """Resolve directory path - can be absolute or relative to project root."""
+        path = Path(dir_path)
+        if path.is_absolute():
+            return path
+        else:
+            return project_root / dir_path
+
     # Extract from helpers/*.ts files
-    helpers_dir = project_root / 'helpers'
+    helpers_dir = resolve_directory(HELPERS_DIR)
     if helpers_dir.exists():
         ts_files = sorted(helpers_dir.glob('*.ts'))
         for ts_file in ts_files:
-            relative_path = f'helpers/{ts_file.name}'
+            # Create relative path for display - always show the configured directory structure
+            relative_path = f'{HELPERS_DIR}/{ts_file.name}' if not Path(HELPERS_DIR).is_absolute() else str(ts_file)
             common_methods = extract_methods_from_common_helpers(ts_file, relative_path)
             if common_methods:
                 print(f"   FOUND Methods: {ts_file.name}: {len(common_methods)} methods")
                 all_methods.extend(common_methods)
 
     # Extract from page-objects/*.ts files
-    page_objects_dir = project_root / 'page-objects'
-    excluded_page_objects = {'POManager.ts', 'BasePage.ts'}
+    page_objects_dir = resolve_directory(PAGE_OBJECTS_DIR)
 
     if page_objects_dir.exists():
         ts_files = sorted(page_objects_dir.glob('*.ts'))
         for ts_file in ts_files:
-            if ts_file.name in excluded_page_objects:
+            if ts_file.name in EXCLUDED_PAGE_OBJECTS:
                 continue
-            relative_path = f'page-objects/{ts_file.name}'
+            # Create relative path for display - always show the configured directory structure
+            relative_path = f'{PAGE_OBJECTS_DIR}/{ts_file.name}' if not Path(PAGE_OBJECTS_DIR).is_absolute() else str(ts_file)
             page_methods = extract_methods_from_page_object(ts_file, relative_path)
             if page_methods:
                 print(f"   FOUND Methods: {ts_file.name}: {len(page_methods)} methods")
@@ -2143,11 +2182,15 @@ def main():
 
     # Extract data
     all_data = []
-    data_dir = project_root / 'data'
+    data_dir = resolve_directory(DATA_DIR)
     if data_dir.exists():
-        ts_files = [f for f in data_dir.rglob('*.ts') if f.name != 'data-interfaces.ts']
+        ts_files = [f for f in data_dir.rglob('*.ts') if f.name not in EXCLUDED_DATA_FILES]
         for ts_file in sorted(ts_files):
-            relative_path = str(ts_file.relative_to(project_root)).replace('\\', '/')
+            # Create relative path for display
+            if Path(DATA_DIR).is_absolute():
+                relative_path = str(ts_file)
+            else:
+                relative_path = str(ts_file.relative_to(project_root)).replace('\\', '/')
             data_objects = extract_data_from_file(ts_file, relative_path)
             if data_objects:
                 print(f"   FOUND Data: {relative_path}: {len(data_objects)} data object(s)")
