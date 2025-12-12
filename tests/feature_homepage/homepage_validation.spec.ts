@@ -26,3 +26,21 @@ test.describe('@feature_homepage ', () => {
   });
 
 });
+
+test.describe('Product Display Validation', () => {
+  test.use({ storageState: 'playwright/.auth/user.json' });
+  let poManager: POManager;
+
+  test.beforeEach(async ({ page }) => {
+    poManager = new POManager(page);
+  });
+
+  test('@QAAGENT-71 should verify products are properly displayed on home page', async () => {
+    const homePage = poManager.getHomepage();
+
+    await homePage.navigateToHomePage();
+    await homePage.verifyProductList();
+    await homePage.verifyProductIsDisplayed('Samsung galaxy s6');
+  });
+
+});
