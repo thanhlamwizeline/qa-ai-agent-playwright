@@ -1,0 +1,56 @@
+version: 2.1
+
+jobs:
+  playwright-e2e-tests:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.41.0-jammy
+    steps:
+      - checkout
+
+      - run:
+          name: Import Env data
+          command: |
+            echo "BASE_URL_E2E=${BASE_URL_E2E}" > .env
+            echo "username=${USERNAME}" >> .env
+            echo "password=${PASSWORD}" >> .env
+      - run:
+          name: Install dependencies
+          command: npm install
+      - run:
+          name: Install Playwright Browsers
+          command: npx playwright install --with-deps
+      - run:
+          name: Run E2E tests
+          command: npm run tests:e2e
+      - run:
+          name: Debug reports
+          when: always
+          command: ls -R
+      - store_artifacts:
+          path: playwright-report
+          destination: playwright-report
+      - store_test_results:
+          path: test-results
+      - run:
+          name: Comment PR with test results
+          when: always
+          command: |
+            if [ -n "$CIRCLE_PULL_REQUEST" ]; then
+              PR_NUMBER=$(echo $CIRCLE_PULL_REQUEST | grep -o '[0-9]*$')
+              STATUS=$([ "$CIRCLE_JOB" = "playwright-e2e-tests" ] && echo "✅ Passed" || echo "❌ Failed")
+              RUN_URL="$CIRCLE_BUILD_URL"
+
+              curl -X POST \
+                -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/issues/$PR_NUMBER/comments" \
+                -d "{\"body\":\"$STATUS – E2E tests finished. [View run details here]($RUN_URL).\"}"
+            fi
+
+workflows:
+  test:
+    jobs:
+      - playwright-e2e-tests:
+          filters:
+            branches:
+              only: main
