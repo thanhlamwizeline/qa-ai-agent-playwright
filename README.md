@@ -1,6 +1,6 @@
 # README #
 
-### What is this repository for? ###
+### What is this repository for ###
 
 * Automation Test Project Template by Playwright Typescript
 
