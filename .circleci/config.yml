@@ -6,7 +6,11 @@ jobs:
       - image: mcr.microsoft.com/playwright:v1.41.0-jammy
     steps:
       - checkout
-
+      - run:
+          name: Install Node.js 18
+          command: |
+            curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+            apt-get install -y nodejs
       - run:
           name: Import Env data
           command: |
@@ -39,7 +43,7 @@ jobs:
               PR_NUMBER=$(echo $CIRCLE_PULL_REQUEST | grep -o '[0-9]*$')
               STATUS=$([ "$CIRCLE_JOB" = "playwright-e2e-tests" ] && echo "✅ Passed" || echo "❌ Failed")
               RUN_URL="$CIRCLE_BUILD_URL"
-
+              
               curl -X POST \
                 -H "Authorization: token $GITHUB_TOKEN" \
                 -H "Accept: application/vnd.github.v3+json" \
